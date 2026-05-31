@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace RateManager.Net10.ViewModels;
+
+public class ExcelImportViewModel
+{
+    public int RatePlanId { get; set; }
+    public string ExcelFilePath { get; set; } = string.Empty;
+    public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public int NumberOfDays { get; set; } = 30;
+    public int DefaultGuestCount { get; set; } = 2;
+    public int DefaultRoomCount { get; set; } = 1;
+    public string? Notes { get; set; }
+
+    public List<SelectListItem> RatePlans { get; set; } = new();
+}

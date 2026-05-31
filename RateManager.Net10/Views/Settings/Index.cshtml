@@ -1,0 +1,49 @@
+@model SettingsViewModel
+@{
+    ViewData["Title"] = "الإعدادات";
+}
+
+<section class="page-header">
+    <h1>الإعدادات</h1>
+    <p>إعدادات واضحة مستقلة عن أسماء نظام الـ PMS القديم.</p>
+</section>
+
+<div class="settings-grid">
+    <section class="card">
+        <h2>أنواع الغرف</h2>
+        <form asp-action="AddRoomType" method="post" class="inline-form">
+            <input name="RoomCode" placeholder="Room Code" />
+            <input name="RoomName" placeholder="Room Name" />
+            <button class="button small" type="submit">إضافة</button>
+        </form>
+        <table class="data-table">
+            <thead><tr><th>الكود</th><th>الاسم</th><th>نشط</th></tr></thead>
+            <tbody>
+            @foreach (var room in Model.RoomTypes)
+            {
+                <tr><td>@room.RoomCode</td><td>@room.RoomName</td><td>@room.IsActive</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <h2>خطط الأسعار</h2>
+        <form asp-action="AddRatePlan" method="post" class="inline-form">
+            <input name="RatePlanCode" placeholder="Rate Plan Code" />
+            <input name="RatePlanName" placeholder="Rate Plan Name" />
+            <input name="MealPlanCode" placeholder="Meal Plan" />
+            <input name="CurrencyCode" value="SAR" placeholder="Currency" />
+            <button class="button small" type="submit">إضافة</button>
+        </form>
+        <table class="data-table">
+            <thead><tr><th>الكود</th><th>الاسم</th><th>Meal</th><th>Currency</th></tr></thead>
+            <tbody>
+            @foreach (var plan in Model.RatePlans)
+            {
+                <tr><td>@plan.RatePlanCode</td><td>@plan.RatePlanName</td><td>@plan.MealPlanCode</td><td>@plan.CurrencyCode</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</div>

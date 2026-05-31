@@ -1,0 +1,101 @@
+@model GenerateRatesViewModel
+@{
+    ViewData["Title"] = "حساب الأسعار";
+    var roomOptions = string.Join("", Model.RoomTypes.Select(x => $"<option value='{x.Value}'>{x.Text}</option>"));
+}
+
+<section class="page-header">
+    <h1>حساب الأسعار</h1>
+    <p>اختار عدد الأيام، نوع الغرفة، عدد النزلاء، عدد الغرف، ثم احسب الأسعار.</p>
+</section>
+
+<form asp-action="Generate" method="post" class="card form-card">
+    <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+    <div class="form-grid">
+        <label>
+            خطة السعر
+            <select asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+        </label>
+        <label>
+            تاريخ البداية
+            <input asp-for="StartDate" type="date" />
+        </label>
+        <label>
+            عدد الأيام
+            <input asp-for="NumberOfDays" type="number" min="1" max="365" />
+        </label>
+        <label>
+            نسبة زيادة/نقصان عامة %
+            <input asp-for="GlobalAdjustmentPercent" type="number" step="0.01" />
+        </label>
+    </div>
+
+    <label>
+        ملاحظات
+        <input asp-for="Notes" />
+    </label>
+
+    <hr />
+    <div class="section-title-row">
+        <h2>الغرف</h2>
+        <button type="button" class="button" onclick="addRoomRow()">إضافة غرفة</button>
+    </div>
+
+    <table class="data-table editable-table" id="roomsTable">
+        <thead>
+            <tr>
+                <th>نوع الغرفة</th>
+                <th>السعر الأساسي</th>
+                <th>نسبة خاصة بالغرفة %</th>
+                <th>عدد النزلاء لكل غرفة</th>
+                <th>عدد الغرف</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @for (var i = 0; i < Model.Rooms.Count; i++)
+        {
+            <tr>
+                <td>
+                    <select name="Rooms[@i].RoomTypeId" class="room-select">
+                    @foreach (var option in Model.RoomTypes)
+                    {
+                        <option value="@option.Value" selected="@(option.Value == Model.Rooms[i].RoomTypeId.ToString() ? "selected" : null)">@option.Text</option>
+                    }
+                    </select>
+                </td>
+                <td><input name="Rooms[@i].BaseRate" value="@Model.Rooms[i].BaseRate" type="number" step="0.001" min="0" /></td>
+                <td><input name="Rooms[@i].RoomAdjustmentPercent" value="@Model.Rooms[i].RoomAdjustmentPercent" type="number" step="0.01" /></td>
+                <td><input name="Rooms[@i].GuestCount" value="@Model.Rooms[i].GuestCount" type="number" min="1" /></td>
+                <td><input name="Rooms[@i].RoomCount" value="@Model.Rooms[i].RoomCount" type="number" min="1" /></td>
+                <td><button type="button" class="link-button danger" onclick="removeRow(this)">حذف</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="actions-row">
+        <button type="submit" class="button primary">Calculate</button>
+        <a asp-controller="Home" asp-action="Index" class="button muted">إلغاء</a>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+    const roomOptionsHtml = `@Html.Raw(roomOptions)`;
+    function addRoomRow() {
+        const tbody = document.querySelector('#roomsTable tbody');
+        const index = tbody.querySelectorAll('tr').length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><select name="Rooms[${index}].RoomTypeId">${roomOptionsHtml}</select></td>
+            <td><input name="Rooms[${index}].BaseRate" type="number" step="0.001" min="0" /></td>
+            <td><input name="Rooms[${index}].RoomAdjustmentPercent" value="0" type="number" step="0.01" /></td>
+            <td><input name="Rooms[${index}].GuestCount" value="2" type="number" min="1" /></td>
+            <td><input name="Rooms[${index}].RoomCount" value="1" type="number" min="1" /></td>
+            <td><button type="button" class="link-button danger" onclick="removeRow(this)">حذف</button></td>`;
+        tbody.appendChild(tr);
+    }
+</script>
+}

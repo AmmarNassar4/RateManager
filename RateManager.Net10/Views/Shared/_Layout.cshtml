@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Rate Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">Rate Manager</div>
+        <nav>
+            <a asp-controller="Home" asp-action="Index">الرئيسية</a>
+            <a asp-controller="Rates" asp-action="Generate">حساب الأسعار</a>
+            <a asp-controller="Rates" asp-action="ImportExcel">استيراد Excel</a>
+            <a asp-controller="Settings" asp-action="Index">الإعدادات</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

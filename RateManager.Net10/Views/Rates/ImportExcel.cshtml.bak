@@ -1,0 +1,55 @@
+@model ExcelImportViewModel
+@{
+    ViewData["Title"] = "استيراد Excel";
+}
+
+<section class="page-header">
+    <h1>استيراد الأسعار من Excel</h1>
+    <p>أدخل مسار ملف Excel على السيرفر أو جهاز التشغيل، وسيتم أخذ الأسعار بدل الحساب.</p>
+</section>
+
+<form asp-action="ImportExcel" method="post" class="card form-card">
+    <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+    <div class="form-grid">
+        <label>
+            خطة السعر
+            <select asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+        </label>
+        <label>
+            تاريخ البداية
+            <input asp-for="StartDate" type="date" />
+        </label>
+        <label>
+            عدد الأيام
+            <input asp-for="NumberOfDays" type="number" min="1" max="365" />
+        </label>
+        <label>
+            عدد النزلاء الافتراضي
+            <input asp-for="DefaultGuestCount" type="number" min="1" />
+        </label>
+        <label>
+            عدد الغرف الافتراضي
+            <input asp-for="DefaultRoomCount" type="number" min="1" />
+        </label>
+    </div>
+
+    <label>
+        مسار ملف Excel
+        <input asp-for="ExcelFilePath" placeholder="C:\\Rates\\Weekly Walk-In Rates.xlsx" />
+    </label>
+
+    <label>
+        ملاحظات
+        <input asp-for="Notes" />
+    </label>
+
+    <div class="hint">
+        يدعم الاستيراد جدولًا عاديًا فيه أعمدة Date / RoomType / Rate، أو Matrix حيث التواريخ في الأعمدة وأنواع الغرف في الصفوف.
+    </div>
+
+    <div class="actions-row">
+        <button type="submit" class="button primary">Import</button>
+        <a asp-controller="Home" asp-action="Index" class="button muted">إلغاء</a>
+    </div>
+</form>
