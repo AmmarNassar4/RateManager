@@ -130,11 +130,7 @@ public class RatesController : Controller
 
     private async Task<GenerateRatesViewModel> BuildGenerateViewModelAsync(GenerateRatesViewModel model)
     {
-        model.RatePlans = await _db.RatePlans
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.RatePlanName)
-            .Select(x => new SelectListItem { Value = x.RatePlanId.ToString(), Text = x.RatePlanName })
-            .ToListAsync();
+        model.RatePlans = await GetOrderedRatePlanItemsAsync();
 
         model.RoomTypes = await _db.RoomTypes
             .Where(x => x.IsActive)
@@ -152,11 +148,7 @@ public class RatesController : Controller
 
     private async Task<ExcelImportViewModel> BuildExcelImportViewModelAsync(ExcelImportViewModel model)
     {
-        model.RatePlans = await _db.RatePlans
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.RatePlanName)
-            .Select(x => new SelectListItem { Value = x.RatePlanId.ToString(), Text = x.RatePlanName })
-            .ToListAsync();
+        model.RatePlans = await GetOrderedRatePlanItemsAsync();
 
         if (model.RatePlanId == 0 && model.RatePlans.Any())
         {
@@ -164,5 +156,15 @@ public class RatesController : Controller
         }
 
         return model;
+    }
+
+    private async Task<List<SelectListItem>> GetOrderedRatePlanItemsAsync()
+    {
+        return await _db.RatePlans
+            .Where(x => x.IsActive)
+            .OrderByDescending(x => x.RatePlanCode == "WALK-IN" || x.RatePlanName == "Walk-In Rates")
+            .ThenBy(x => x.RatePlanName)
+            .Select(x => new SelectListItem { Value = x.RatePlanId.ToString(), Text = x.RatePlanName })
+            .ToListAsync();
     }
 }
