@@ -203,7 +203,7 @@ public class PmsExportService : IPmsExportService
     private static async Task<string> UpsertRowAsync(SqlConnection connection, SqlTransaction transaction, PmsExportRow row)
     {
         const string updateSql = @"
-UPDATE FMTTBTBL
+UPDATE pms.FMTTBTBL
 SET
     CURCOD = @CURCOD,
     DESCRP = @DESCRP,
@@ -251,7 +251,7 @@ WHERE TRFTBL = @TRFTBL
         }
 
         const string insertSql = @"
-INSERT INTO FMTTBTBL
+INSERT INTO pms.FMTTBTBL
 (
     TRFTBL, PRPCOD, ROMTYP, FRMDAT, TOODAT, PLNCOD, DAYCOD, CURCOD, DESCRP, TBLTYP,
     FTRSGL, FTRDBL, FTRTBL, FTRFOR, FTRADT, FTRCHD, FCURCD,
