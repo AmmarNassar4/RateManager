@@ -38,7 +38,7 @@ public class AccountController : Controller
         var user = await _db.AppUsers.FirstOrDefaultAsync(x => x.UserName == model.UserName && x.IsActive);
         if (user == null || !PasswordHasher.VerifyPassword(model.Password, user.PasswordHash))
         {
-            ModelState.AddModelError(string.Empty, "اسم المستخدم أو كلمة المرور غير صحيحة.");
+            ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View(model);
         }
 
