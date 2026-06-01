@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<DailyRoomRate> DailyRoomRates => Set<DailyRoomRate>();
     public DbSet<RateOverride> RateOverrides => Set<RateOverride>();
     public DbSet<RateAuditLog> RateAuditLogs => Set<RateAuditLog>();
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<WeekendDaySetting> WeekendDaySettings => Set<WeekendDaySetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +57,7 @@ public class AppDbContext : DbContext
             entity.Property(x => x.StartDate).HasConversion<DateOnlyConverter>();
             entity.Property(x => x.EndDate).HasConversion<DateOnlyConverter>();
             entity.Property(x => x.GlobalAdjustmentPercent).HasColumnType("decimal(9,4)");
+            entity.Property(x => x.WeekendAdjustmentPercent).HasColumnType("decimal(9,4)");
             entity.Property(x => x.SourceFilePath).HasMaxLength(500);
             entity.Property(x => x.CreatedBy).HasMaxLength(100);
         });
@@ -96,13 +99,24 @@ public class AppDbContext : DbContext
             entity.Property(x => x.FieldName).HasMaxLength(100);
             entity.Property(x => x.CreatedBy).HasMaxLength(100);
         });
-    
 
-        // Disable cascade delete globally for SQL Server.
-        // This prevents "multiple cascade paths" errors when EF creates the database.
+        modelBuilder.Entity<AppUser>(entity =>
+        {
+            entity.HasIndex(x => x.UserName).IsUnique();
+            entity.Property(x => x.UserName).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.PasswordHash).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.Role).HasConversion<string>().HasMaxLength(20).IsRequired();
+        });
+
+        modelBuilder.Entity<WeekendDaySetting>(entity =>
+        {
+            entity.HasIndex(x => x.Weekday).IsUnique();
+            entity.Property(x => x.Weekday).HasConversion<string>().HasMaxLength(20).IsRequired();
+        });
+
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(entityType => entityType.GetForeignKeys()))
         {
             foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
-}
+    }
 }
