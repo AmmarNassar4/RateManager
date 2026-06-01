@@ -24,13 +24,22 @@ public class CurrentRateController : Controller
     public async Task<IActionResult> Index()
     {
         var mealPrices = await _db.MealPriceSettings.OrderBy(x => x.MealPriceSettingId).FirstOrDefaultAsync();
+        var breakfastPrice = mealPrices?.BreakfastPrice ?? 0;
+        var lunchPrice = mealPrices?.LunchPrice ?? 0;
+        var childBreakfastDiscount = mealPrices?.ChildBreakfastDiscountPercent ?? 50;
+        var childLunchDiscount = mealPrices?.ChildLunchDiscountPercent ?? 50;
+
         var model = new CurrentRateCalculatorViewModel
         {
             StartDate = DateOnly.FromDateTime(DateTime.Today),
             Nights = 1,
             RoomCount = 1,
-            BreakfastPrice = mealPrices?.BreakfastPrice ?? 0,
-            LunchPrice = mealPrices?.LunchPrice ?? 0,
+            BreakfastPrice = breakfastPrice,
+            LunchPrice = lunchPrice,
+            ChildBreakfastDiscountPercent = childBreakfastDiscount,
+            ChildLunchDiscountPercent = childLunchDiscount,
+            ChildBreakfastPrice = CalculateChildMealPrice(breakfastPrice, childBreakfastDiscount),
+            ChildLunchPrice = CalculateChildMealPrice(lunchPrice, childLunchDiscount),
             TaxPercent = mealPrices?.TaxPercent ?? 15,
             RatePlans = await _db.RatePlans
                 .Where(x => x.IsActive)
@@ -70,5 +79,11 @@ public class CurrentRateController : Controller
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    private static decimal CalculateChildMealPrice(decimal adultMealPrice, decimal discountPercent)
+    {
+        var normalizedDiscount = Math.Clamp(discountPercent, 0, 100);
+        return Math.Round(adultMealPrice * (1 - normalizedDiscount / 100m), 3, MidpointRounding.AwayFromZero);
     }
 }
