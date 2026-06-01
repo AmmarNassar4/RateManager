@@ -11,11 +11,17 @@ public class CurrentRateCalculatorViewModel
     public int RoomCount { get; set; } = 1;
     public bool IncludeBreakfast { get; set; }
     public int BreakfastPeople { get; set; } = 0;
+    public int ChildBreakfastPeople { get; set; } = 0;
     public bool IncludeLunch { get; set; }
     public int LunchPeople { get; set; } = 0;
+    public int ChildLunchPeople { get; set; } = 0;
 
     public decimal BreakfastPrice { get; set; }
     public decimal LunchPrice { get; set; }
+    public decimal ChildBreakfastPrice { get; set; }
+    public decimal ChildLunchPrice { get; set; }
+    public decimal ChildBreakfastDiscountPercent { get; set; }
+    public decimal ChildLunchDiscountPercent { get; set; }
     public decimal TaxPercent { get; set; }
 
     public List<SelectListItem> RatePlans { get; set; } = new();
@@ -31,8 +37,10 @@ public class CurrentRateCalculationRequest
     public int RoomCount { get; set; } = 1;
     public bool IncludeBreakfast { get; set; }
     public int BreakfastPeople { get; set; }
+    public int ChildBreakfastPeople { get; set; }
     public bool IncludeLunch { get; set; }
     public int LunchPeople { get; set; }
+    public int ChildLunchPeople { get; set; }
 }
 
 public class CurrentRateCalculationResponse
@@ -48,9 +56,16 @@ public class CurrentRateCalculationResponse
     public decimal BreakfastPrice { get; set; }
     public int BreakfastPeople { get; set; }
     public decimal BreakfastTotal { get; set; }
+    public decimal ChildBreakfastPrice { get; set; }
+    public int ChildBreakfastPeople { get; set; }
+    public decimal ChildBreakfastTotal { get; set; }
     public decimal LunchPrice { get; set; }
     public int LunchPeople { get; set; }
     public decimal LunchTotal { get; set; }
+    public decimal ChildLunchPrice { get; set; }
+    public int ChildLunchPeople { get; set; }
+    public decimal ChildLunchTotal { get; set; }
+    public decimal MealTotal { get; set; }
     public decimal Subtotal { get; set; }
     public decimal TaxPercent { get; set; }
     public decimal TaxAmount { get; set; }
