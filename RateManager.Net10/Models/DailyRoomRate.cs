@@ -9,6 +9,7 @@ public class DailyRoomRate
 
     public DateOnly RateDate { get; set; }
     public string DayName { get; set; } = string.Empty;
+    public bool IsWeekend { get; set; }
 
     public int GuestCount { get; set; }
     public int RoomCount { get; set; }
