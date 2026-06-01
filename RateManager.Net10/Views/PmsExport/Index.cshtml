@@ -1,0 +1,101 @@
+@model PmsExportViewModel
+@{
+    ViewData["Title"] = "PMS Export";
+}
+
+<section class="page-header">
+    <h1>PMS Export</h1>
+    <p>Export generated daily rates to the external PMS table FMTTBTBL using TRFTBL = 9.</p>
+</section>
+
+@if (TempData["ExportSummary"] != null)
+{
+    <section class="card success-card">
+        <h2>Export Result</h2>
+        <p>@TempData["ExportSummary"]</p>
+        @if (TempData["ExportMessages"] != null)
+        {
+            <pre>@TempData["ExportMessages"]</pre>
+        }
+    </section>
+}
+
+<form asp-action="Index" method="post" class="card form-card">
+    <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+    <div class="form-grid">
+        <label>
+            Rate Plan Source
+            <select asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+        </label>
+
+        <label>
+            Start Date
+            <input asp-for="StartDate" type="date" />
+        </label>
+
+        <label>
+            Number of Days
+            <input asp-for="NumberOfDays" type="number" min="1" max="366" />
+        </label>
+
+        <label>
+            FB Meal Price
+            <input asp-for="FbMealPrice" type="number" min="0" step="0.001" />
+        </label>
+    </div>
+
+    <section class="card nested-card">
+        <h2>Meal Plan Export</h2>
+        <p class="hint">
+            RO = no meal, BB = breakfast, HB = lunch, FB = custom meal price entered on this screen.
+        </p>
+        <div class="checkbox-grid">
+            <label class="checkbox-line"><input asp-for="ExportRo" type="checkbox" /> Export RO</label>
+            <label class="checkbox-line"><input asp-for="ExportBb" type="checkbox" /> Export BB</label>
+            <label class="checkbox-line"><input asp-for="ExportHb" type="checkbox" /> Export HB</label>
+            <label class="checkbox-line"><input asp-for="ExportFb" type="checkbox" /> Export FB</label>
+        </div>
+    </section>
+
+    <section class="card nested-card">
+        <h2>Room Type Mapping</h2>
+        <p class="hint">Map each internal room type to the PMS ROMTYP code, for example RM1.</p>
+        <table class="data-table editable-table">
+            <thead>
+                <tr>
+                    <th>Internal Room Code</th>
+                    <th>Room Name</th>
+                    <th>PMS ROMTYP</th>
+                </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.RoomMappings.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Model.RoomMappings[i].RoomCode
+                        <input type="hidden" name="RoomMappings[@i].RoomTypeId" value="@Model.RoomMappings[i].RoomTypeId" />
+                        <input type="hidden" name="RoomMappings[@i].RoomCode" value="@Model.RoomMappings[i].RoomCode" />
+                        <input type="hidden" name="RoomMappings[@i].RoomName" value="@Model.RoomMappings[i].RoomName" />
+                    </td>
+                    <td>@Model.RoomMappings[i].RoomName</td>
+                    <td>
+                        <input name="RoomMappings[@i].PmsRoomTypeCode" value="@Model.RoomMappings[i].PmsRoomTypeCode" placeholder="RM1" />
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </section>
+
+    <div class="hint">
+        The export keeps fixed PMS values such as PRPCOD = RRK, CURCOD = SAR, TBLTYP = R, and writes daily rows with FRMDAT = TOODAT.
+        Existing rows are updated; missing rows are inserted.
+    </div>
+
+    <div class="actions-row">
+        <button type="submit" class="button primary">Export to PMS</button>
+        <a asp-controller="Home" asp-action="Index" class="button muted">Cancel</a>
+    </div>
+</form>
