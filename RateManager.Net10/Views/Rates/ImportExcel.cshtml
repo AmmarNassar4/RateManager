@@ -25,11 +25,6 @@
         </label>
 
         <label>
-            Default Discount %
-            <input asp-for="DiscountPercent" type="number" min="0" max="100" step="0.01" />
-        </label>
-
-        <label>
             Start Date
             <input asp-for="StartDate" type="date" />
         </label>
@@ -70,8 +65,8 @@
     </label>
 
     <div class="hint">
-        The system will try to detect the discounted section in the same file using words such as Discount, Family, Friends, or 25%.
-        If no discounted section is found, the discounted rates will be calculated from regular rates using the default discount percentage.
+        Discounted rates are imported only from Excel cells. The system will not calculate discounted rates using a fixed percentage.
+        Make sure the file contains either a discounted section, such as Discount / Family / Friends, or a discounted-rate column.
     </div>
 
     <div class="actions-row">
