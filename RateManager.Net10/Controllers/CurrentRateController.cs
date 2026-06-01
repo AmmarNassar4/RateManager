@@ -34,7 +34,8 @@ public class CurrentRateController : Controller
             TaxPercent = mealPrices?.TaxPercent ?? 15,
             RatePlans = await _db.RatePlans
                 .Where(x => x.IsActive)
-                .OrderBy(x => x.RatePlanName)
+                .OrderByDescending(x => x.RatePlanCode == "WALK-IN" || x.RatePlanName == "Walk-In Rates")
+                .ThenBy(x => x.RatePlanName)
                 .Select(x => new SelectListItem { Value = x.RatePlanId.ToString(), Text = x.RatePlanName })
                 .ToListAsync(),
             RoomTypes = await _db.RoomTypes
