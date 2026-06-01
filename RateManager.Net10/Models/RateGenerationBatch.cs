@@ -15,6 +15,7 @@ public class RateGenerationBatch
     public DateOnly EndDate { get; set; }
     public int NumberOfDays { get; set; }
     public decimal GlobalAdjustmentPercent { get; set; }
+    public decimal WeekendAdjustmentPercent { get; set; }
     public string? SourceFilePath { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
