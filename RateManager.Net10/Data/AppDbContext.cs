@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<WeekendDaySetting> WeekendDaySettings => Set<WeekendDaySetting>();
     public DbSet<MealPriceSetting> MealPriceSettings => Set<MealPriceSetting>();
+    public DbSet<PmsRoomTypeMapping> PmsRoomTypeMappings => Set<PmsRoomTypeMapping>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -122,6 +123,12 @@ public class AppDbContext : DbContext
             entity.Property(x => x.TaxPercent).HasColumnType("decimal(9,4)");
             entity.Property(x => x.ChildBreakfastDiscountPercent).HasColumnType("decimal(9,4)");
             entity.Property(x => x.ChildLunchDiscountPercent).HasColumnType("decimal(9,4)");
+        });
+
+        modelBuilder.Entity<PmsRoomTypeMapping>(entity =>
+        {
+            entity.HasIndex(x => x.RoomTypeId).IsUnique();
+            entity.Property(x => x.PmsRoomTypeCode).HasMaxLength(20).IsRequired();
         });
 
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(entityType => entityType.GetForeignKeys()))
