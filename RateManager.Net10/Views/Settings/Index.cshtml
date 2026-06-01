@@ -49,7 +49,7 @@
 
     <section class="card">
         <h2>Pricing Settings</h2>
-        <p class="hint">These values are used by the Current Rate Calculator.</p>
+        <p class="hint">These values are used by the Current Rate Calculator. Child meal prices are calculated as adult meal price minus the configured discount.</p>
         <form asp-action="UpdateMealPrices" method="post" class="inline-form">
             <label>
                 Breakfast Price
@@ -58,6 +58,14 @@
             <label>
                 Lunch Price
                 <input name="LunchPrice" value="@Model.MealPrices.LunchPrice.ToString("0.###")" type="number" min="0" step="0.001" />
+            </label>
+            <label>
+                Child Breakfast Discount %
+                <input name="ChildBreakfastDiscountPercent" value="@Model.MealPrices.ChildBreakfastDiscountPercent.ToString("0.####")" type="number" min="0" max="100" step="0.01" />
+            </label>
+            <label>
+                Child Lunch Discount %
+                <input name="ChildLunchDiscountPercent" value="@Model.MealPrices.ChildLunchDiscountPercent.ToString("0.####")" type="number" min="0" max="100" step="0.01" />
             </label>
             <label>
                 Tax %
