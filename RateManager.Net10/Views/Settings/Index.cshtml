@@ -48,8 +48,8 @@
     </section>
 
     <section class="card">
-        <h2>Meal Prices</h2>
-        <p class="hint">These fixed prices are used by the Current Rate Calculator.</p>
+        <h2>Pricing Settings</h2>
+        <p class="hint">These values are used by the Current Rate Calculator.</p>
         <form asp-action="UpdateMealPrices" method="post" class="inline-form">
             <label>
                 Breakfast Price
@@ -59,7 +59,11 @@
                 Lunch Price
                 <input name="LunchPrice" value="@Model.MealPrices.LunchPrice.ToString("0.###")" type="number" min="0" step="0.001" />
             </label>
-            <button class="button small" type="submit">Save Meal Prices</button>
+            <label>
+                Tax %
+                <input name="TaxPercent" value="@Model.MealPrices.TaxPercent.ToString("0.####")" type="number" min="0" step="0.01" />
+            </label>
+            <button class="button small" type="submit">Save Pricing Settings</button>
         </form>
     </section>
 
