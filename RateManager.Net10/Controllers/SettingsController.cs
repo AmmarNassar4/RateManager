@@ -125,6 +125,8 @@ public class SettingsController : Controller
         settings.BreakfastPrice = input.BreakfastPrice;
         settings.LunchPrice = input.LunchPrice;
         settings.TaxPercent = input.TaxPercent;
+        settings.ChildBreakfastDiscountPercent = input.ChildBreakfastDiscountPercent;
+        settings.ChildLunchDiscountPercent = input.ChildLunchDiscountPercent;
         settings.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
@@ -155,7 +157,9 @@ public class SettingsController : Controller
             {
                 BreakfastPrice = 50,
                 LunchPrice = 100,
-                TaxPercent = 15
+                TaxPercent = 15,
+                ChildBreakfastDiscountPercent = 50,
+                ChildLunchDiscountPercent = 50
             });
 
             await _db.SaveChangesAsync();
