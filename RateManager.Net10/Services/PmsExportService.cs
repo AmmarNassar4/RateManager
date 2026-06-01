@@ -308,7 +308,7 @@ VALUES
         command.Parameters.AddWithValue("@FFBADT", row.FoodAdultRate);
         command.Parameters.AddWithValue("@FFBCHD", row.FoodChildRate);
         command.Parameters.AddWithValue("@USERID", row.UserId);
-        command.Parameters.AddWithValue("@LSTDAT", row.ToDate);
+        command.Parameters.AddWithValue("@LSTDAT", now.ToString("yyyyMMdd"));
         command.Parameters.AddWithValue("@LSTTIM", now.ToString("HH.mm"));
     }
 }
