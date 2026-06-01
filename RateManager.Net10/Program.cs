@@ -30,6 +30,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IRateCalculationService, RateCalculationService>();
 builder.Services.AddScoped<IExcelRateImportService, ExcelRateImportService>();
 builder.Services.AddScoped<IRateAuditService, RateAuditService>();
+builder.Services.AddScoped<ICurrentRateCalculatorService, CurrentRateCalculatorService>();
 
 var app = builder.Build();
 
