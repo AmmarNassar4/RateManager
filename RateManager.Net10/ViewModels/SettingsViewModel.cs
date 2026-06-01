@@ -8,6 +8,7 @@ public class SettingsViewModel
     public List<RatePlan> RatePlans { get; set; } = new();
     public List<AppUser> Users { get; set; } = new();
     public List<WeekendDaySetting> WeekendDays { get; set; } = new();
+    public MealPriceSetting MealPrices { get; set; } = new();
 }
 
 public class CreateRoomTypeInput
@@ -27,4 +28,10 @@ public class CreateRatePlanInput
 public class UpdateWeekendDaysInput
 {
     public List<DayOfWeek> WeekendDays { get; set; } = new();
+}
+
+public class UpdateMealPricesInput
+{
+    public decimal BreakfastPrice { get; set; }
+    public decimal LunchPrice { get; set; }
 }
