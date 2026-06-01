@@ -119,6 +119,7 @@ public class AppDbContext : DbContext
         {
             entity.Property(x => x.BreakfastPrice).HasColumnType("decimal(18,3)");
             entity.Property(x => x.LunchPrice).HasColumnType("decimal(18,3)");
+            entity.Property(x => x.TaxPercent).HasColumnType("decimal(9,4)");
         });
 
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(entityType => entityType.GetForeignKeys()))
