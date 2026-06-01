@@ -35,4 +35,6 @@ public class UpdateMealPricesInput
     public decimal BreakfastPrice { get; set; }
     public decimal LunchPrice { get; set; }
     public decimal TaxPercent { get; set; }
+    public decimal ChildBreakfastDiscountPercent { get; set; }
+    public decimal ChildLunchDiscountPercent { get; set; }
 }
