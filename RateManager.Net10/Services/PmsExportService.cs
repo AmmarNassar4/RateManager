@@ -97,13 +97,20 @@ public class PmsExportService : IPmsExportService
             }
         }
 
+        var orderedExportRows = exportRows
+            .OrderBy(x => x.RoomTypeCode)
+            .ThenBy(x => x.PlanCode)
+            .ThenBy(x => x.DayCode)
+            .ThenBy(x => x.FromDate)
+            .ToList();
+
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
         await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
         try
         {
-            foreach (var row in exportRows)
+            foreach (var row in orderedExportRows)
             {
                 var affected = await UpsertRowAsync(connection, transaction, row);
                 if (affected == "INSERT")
