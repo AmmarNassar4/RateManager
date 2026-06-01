@@ -5,34 +5,34 @@
 
 <section class="page-header">
     <h1>Current Rate Calculator</h1>
-    <p>Calculate the current total using the latest saved daily rate for each night.</p>
+    <p>The total updates automatically using the latest saved daily rate for each night.</p>
 </section>
 
 <section class="card form-card">
     <div class="form-grid">
         <label>
             Rate Plan
-            <select id="ratePlanId" asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+            <select id="ratePlanId" asp-for="RatePlanId" asp-items="Model.RatePlans" data-auto-calc="true"></select>
         </label>
 
         <label>
             Room Type
-            <select id="roomTypeId" asp-for="RoomTypeId" asp-items="Model.RoomTypes"></select>
+            <select id="roomTypeId" asp-for="RoomTypeId" asp-items="Model.RoomTypes" data-auto-calc="true"></select>
         </label>
 
         <label>
             Start Date
-            <input id="startDate" asp-for="StartDate" type="date" />
+            <input id="startDate" asp-for="StartDate" type="date" data-auto-calc="true" />
         </label>
 
         <label>
             Nights
-            <input id="nights" asp-for="Nights" type="number" min="1" max="365" />
+            <input id="nights" asp-for="Nights" type="number" min="1" max="365" data-auto-calc="true" />
         </label>
 
         <label>
             Room Count
-            <input id="roomCount" asp-for="RoomCount" type="number" min="1" />
+            <input id="roomCount" asp-for="RoomCount" type="number" min="1" data-auto-calc="true" />
         </label>
     </div>
 
@@ -40,48 +40,50 @@
 
     <div class="form-grid">
         <label class="checkbox-line">
-            <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" />
+            <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" data-auto-calc="true" />
             Include Breakfast (@Model.BreakfastPrice.ToString("0.###") per person per night)
         </label>
 
         <label>
             Breakfast People
-            <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" />
+            <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" data-auto-calc="true" />
         </label>
 
         <label class="checkbox-line">
-            <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" />
+            <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" data-auto-calc="true" />
             Include Lunch (@Model.LunchPrice.ToString("0.###") per person per night)
         </label>
 
         <label>
             Lunch People
-            <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" />
+            <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" data-auto-calc="true" />
         </label>
     </div>
 
-    <div class="actions-row">
-        <button type="button" class="button primary" onclick="calculateCurrentRate()">Calculate</button>
+    <div class="hint">
+        Tax is currently @Model.TaxPercent.ToString("0.####")% and can be changed from Settings.
     </div>
 </section>
 
 <section class="card" id="resultCard" style="display:none;">
-    <h2>Result</h2>
+    <h2>Price Details</h2>
     <div class="stats-grid">
         <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
         <div class="stat-card"><span id="breakfastTotal">0</span><label>Breakfast Total</label></div>
         <div class="stat-card"><span id="lunchTotal">0</span><label>Lunch Total</label></div>
+        <div class="stat-card"><span id="subtotal">0</span><label>Subtotal</label></div>
+        <div class="stat-card"><span id="taxAmount">0</span><label id="taxLabel">Tax</label></div>
         <div class="stat-card"><span id="grandTotal">0</span><label>Grand Total</label></div>
     </div>
 
-    <h3>Nightly Breakdown</h3>
+    <h3>Nightly Room Breakdown</h3>
     <table class="data-table">
         <thead>
             <tr>
                 <th>Date</th>
                 <th>Room Rate</th>
                 <th>Rooms</th>
-                <th>Total</th>
+                <th>Room Total</th>
             </tr>
         </thead>
         <tbody id="breakdownBody"></tbody>
@@ -95,6 +97,8 @@
 
 @section Scripts {
 <script>
+    let calculateTimer = null;
+
     function money(value) {
         return Number(value || 0).toFixed(3);
     }
@@ -113,14 +117,28 @@
         return params.toString();
     }
 
+    function scheduleCalculation() {
+        window.clearTimeout(calculateTimer);
+        calculateTimer = window.setTimeout(calculateCurrentRate, 250);
+    }
+
     async function calculateCurrentRate() {
-        document.getElementById('resultCard').style.display = 'none';
+        const startDate = document.getElementById('startDate').value;
+        const nights = Number(document.getElementById('nights').value || 0);
+        const roomCount = Number(document.getElementById('roomCount').value || 0);
+
+        if (!startDate || nights <= 0 || roomCount <= 0) {
+            document.getElementById('resultCard').style.display = 'none';
+            return;
+        }
+
         document.getElementById('errorCard').style.display = 'none';
 
         const response = await fetch(`/api/current-rate/calculate?${buildQuery()}`);
         const payload = await response.json();
 
         if (!response.ok) {
+            document.getElementById('resultCard').style.display = 'none';
             document.getElementById('errorMessage').textContent = payload.message || 'Calculation failed.';
             document.getElementById('errorCard').style.display = 'block';
             return;
@@ -129,6 +147,9 @@
         document.getElementById('roomTotal').textContent = money(payload.roomTotal);
         document.getElementById('breakfastTotal').textContent = money(payload.breakfastTotal);
         document.getElementById('lunchTotal').textContent = money(payload.lunchTotal);
+        document.getElementById('subtotal').textContent = money(payload.subtotal);
+        document.getElementById('taxAmount').textContent = money(payload.taxAmount);
+        document.getElementById('taxLabel').textContent = `Tax (${Number(payload.taxPercent || 0).toFixed(2)}%)`;
         document.getElementById('grandTotal').textContent = money(payload.grandTotal);
 
         const body = document.getElementById('breakdownBody');
@@ -145,5 +166,14 @@
 
         document.getElementById('resultCard').style.display = 'block';
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-auto-calc="true"]').forEach(element => {
+            element.addEventListener('input', scheduleCalculation);
+            element.addEventListener('change', scheduleCalculation);
+        });
+
+        scheduleCalculation();
+    });
 </script>
 }
