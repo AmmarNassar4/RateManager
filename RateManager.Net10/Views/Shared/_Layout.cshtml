@@ -13,6 +13,7 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <a asp-controller="Home" asp-action="Index">Home</a>
+                <a asp-controller="CurrentRate" asp-action="Index">Current Rate</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a asp-controller="Rates" asp-action="Generate">Generate Rates</a>
