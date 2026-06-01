@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,16 +12,16 @@
         <nav>
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a asp-controller="Home" asp-action="Index">الرئيسية</a>
+                <a asp-controller="Home" asp-action="Index">Home</a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-controller="Rates" asp-action="Generate">حساب الأسعار</a>
-                    <a asp-controller="Rates" asp-action="ImportExcel">استيراد Excel</a>
-                    <a asp-controller="Settings" asp-action="Index">الإعدادات</a>
+                    <a asp-controller="Rates" asp-action="Generate">Generate Rates</a>
+                    <a asp-controller="Rates" asp-action="ImportExcel">Import Excel</a>
+                    <a asp-controller="Settings" asp-action="Index">Settings</a>
                 }
                 <span class="nav-user">@User.Identity.Name</span>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
-                    <button type="submit" class="link-button">خروج</button>
+                    <button type="submit" class="link-button">Logout</button>
                 </form>
             }
         </nav>
