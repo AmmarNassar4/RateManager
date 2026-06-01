@@ -31,6 +31,7 @@ builder.Services.AddScoped<IRateCalculationService, RateCalculationService>();
 builder.Services.AddScoped<IExcelRateImportService, ExcelRateImportService>();
 builder.Services.AddScoped<IRateAuditService, RateAuditService>();
 builder.Services.AddScoped<ICurrentRateCalculatorService, CurrentRateCalculatorService>();
+builder.Services.AddScoped<IPmsExportService, PmsExportService>();
 
 var app = builder.Build();
 
