@@ -16,6 +16,7 @@ public class CurrentRateCalculatorViewModel
 
     public decimal BreakfastPrice { get; set; }
     public decimal LunchPrice { get; set; }
+    public decimal TaxPercent { get; set; }
 
     public List<SelectListItem> RatePlans { get; set; } = new();
     public List<SelectListItem> RoomTypes { get; set; } = new();
@@ -50,6 +51,9 @@ public class CurrentRateCalculationResponse
     public decimal LunchPrice { get; set; }
     public int LunchPeople { get; set; }
     public decimal LunchTotal { get; set; }
+    public decimal Subtotal { get; set; }
+    public decimal TaxPercent { get; set; }
+    public decimal TaxAmount { get; set; }
     public decimal GrandTotal { get; set; }
     public List<CurrentRateNightLine> NightsBreakdown { get; set; } = new();
 }
