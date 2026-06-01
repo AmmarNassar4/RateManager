@@ -42,7 +42,7 @@ public class ExcelRateImportService : IExcelRateImportService
         {
             var startDate = model.StartDate;
             var endDate = model.StartDate.AddDays(model.NumberOfDays - 1);
-            var importedRows = ReadRatesFromExcel(excelPath, model.StartDate, model.NumberOfDays);
+            var importedRows = ReadRatesFromExcel(excelPath);
 
             var regularRows = importedRows
                 .Where(x => x.RateKind == ExcelRateKind.Regular && x.RateDate >= startDate && x.RateDate <= endDate)
@@ -69,14 +69,7 @@ public class ExcelRateImportService : IExcelRateImportService
             {
                 if (!discountRows.Any())
                 {
-                    discountRows = regularRows
-                        .Select(x => x with
-                        {
-                            RateKind = ExcelRateKind.Discount,
-                            Rate = Math.Round(x.Rate * (1 - model.DiscountPercent / 100m), 3, MidpointRounding.AwayFromZero),
-                            SectionName = $"Calculated discount {model.DiscountPercent:0.##}%"
-                        })
-                        .ToList();
+                    throw new InvalidOperationException("No discounted rates were found in the Excel file. Discounted rates must be imported from Excel cells, not calculated from a fixed percentage.");
                 }
 
                 await SaveRowsAsync(
@@ -239,7 +232,7 @@ public class ExcelRateImportService : IExcelRateImportService
         return room;
     }
 
-    private static List<ExcelRateRow> ReadRatesFromExcel(string path, DateOnly fallbackStartDate, int numberOfDays)
+    private static List<ExcelRateRow> ReadRatesFromExcel(string path)
     {
         using var workbook = new XLWorkbook(path);
         var rows = new List<ExcelRateRow>();
@@ -253,7 +246,7 @@ public class ExcelRateImportService : IExcelRateImportService
             }
 
             rows.AddRange(ReadNormalizedTable(worksheet));
-            rows.AddRange(ReadMatrixSections(worksheet, fallbackStartDate, numberOfDays));
+            rows.AddRange(ReadMatrixSections(worksheet));
         }
 
         return rows
@@ -323,7 +316,7 @@ public class ExcelRateImportService : IExcelRateImportService
         }
     }
 
-    private static IEnumerable<ExcelRateRow> ReadMatrixSections(IXLWorksheet worksheet, DateOnly fallbackStartDate, int numberOfDays)
+    private static IEnumerable<ExcelRateRow> ReadMatrixSections(IXLWorksheet worksheet)
     {
         var range = worksheet.RangeUsed();
         if (range == null)
@@ -421,7 +414,7 @@ public class ExcelRateImportService : IExcelRateImportService
     private static ExcelRateKind DetectRateKind(string sectionName)
     {
         var normalized = NormalizeHeader(sectionName);
-        if (normalized.Contains("discount") || normalized.Contains("family") || normalized.Contains("friends") || normalized.Contains("25"))
+        if (normalized.Contains("discount") || normalized.Contains("family") || normalized.Contains("friends"))
         {
             return ExcelRateKind.Discount;
         }
