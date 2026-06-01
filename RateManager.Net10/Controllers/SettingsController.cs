@@ -124,6 +124,7 @@ public class SettingsController : Controller
         var settings = await _db.MealPriceSettings.OrderBy(x => x.MealPriceSettingId).FirstAsync();
         settings.BreakfastPrice = input.BreakfastPrice;
         settings.LunchPrice = input.LunchPrice;
+        settings.TaxPercent = input.TaxPercent;
         settings.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
@@ -153,7 +154,8 @@ public class SettingsController : Controller
             _db.MealPriceSettings.Add(new MealPriceSetting
             {
                 BreakfastPrice = 50,
-                LunchPrice = 100
+                LunchPrice = 100,
+                TaxPercent = 15
             });
 
             await _db.SaveChangesAsync();
