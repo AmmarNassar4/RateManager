@@ -11,9 +11,6 @@ public class ExcelImportViewModel
     // Optional rate plan that receives the discounted prices from the same Excel file.
     public int? DiscountRatePlanId { get; set; }
 
-    // Used only when the Excel file does not contain a detectable discounted section.
-    public decimal DiscountPercent { get; set; } = 25;
-
     // Main import option: select the Excel file from the browser.
     public IFormFile? ExcelFile { get; set; }
 
