@@ -8,6 +8,7 @@ public class GenerateRatesViewModel
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public int NumberOfDays { get; set; } = 30;
     public decimal GlobalAdjustmentPercent { get; set; }
+    public decimal WeekendAdjustmentPercent { get; set; }
     public string? Notes { get; set; }
 
     public List<RoomRateInputModel> Rooms { get; set; } = new();
