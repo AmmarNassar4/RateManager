@@ -3,111 +3,166 @@
     ViewData["Title"] = "Current Rate Calculator";
 }
 
+<style>
+    .current-rate-layout {
+        display: grid;
+        grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+        gap: 1.25rem;
+        align-items: start;
+    }
+
+    .current-rate-panel {
+        position: sticky;
+        top: 1rem;
+    }
+
+    .current-rate-fields {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .current-rate-meal-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+    }
+
+    .current-rate-result-stack {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @@media (max-width: 1000px) {
+        .current-rate-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .current-rate-panel {
+            position: static;
+        }
+    }
+</style>
+
 <section class="page-header">
     <h1>Current Rate Calculator</h1>
     <p>The total updates automatically using the latest saved daily rate for each night.</p>
 </section>
 
-<section class="card form-card">
-    <div class="form-grid">
-        <label>
-            Rate Plan
-            <select id="ratePlanId" asp-for="RatePlanId" asp-items="Model.RatePlans" data-auto-calc="true"></select>
-        </label>
+<div class="current-rate-layout">
+    <section class="card form-card current-rate-panel">
+        <h2>Calculation Inputs</h2>
 
-        <label>
-            Room Type
-            <select id="roomTypeId" asp-for="RoomTypeId" asp-items="Model.RoomTypes" data-auto-calc="true"></select>
-        </label>
+        <div class="current-rate-fields">
+            <label>
+                Rate Plan
+                <select id="ratePlanId" asp-for="RatePlanId" asp-items="Model.RatePlans" data-auto-calc="true"></select>
+            </label>
 
-        <label>
-            Start Date
-            <input id="startDate" asp-for="StartDate" type="date" data-auto-calc="true" />
-        </label>
+            <label>
+                Room Type
+                <select id="roomTypeId" asp-for="RoomTypeId" asp-items="Model.RoomTypes" data-auto-calc="true"></select>
+            </label>
 
-        <label>
-            Nights
-            <input id="nights" asp-for="Nights" type="number" min="1" max="365" data-auto-calc="true" />
-        </label>
+            <label>
+                Start Date
+                <input id="startDate" asp-for="StartDate" type="date" data-auto-calc="true" />
+            </label>
 
-        <label>
-            Room Count
-            <input id="roomCount" asp-for="RoomCount" type="number" min="1" data-auto-calc="true" />
-        </label>
+            <label>
+                Nights
+                <input id="nights" asp-for="Nights" type="number" min="1" max="365" data-auto-calc="true" />
+            </label>
+
+            <label>
+                Room Count
+                <input id="roomCount" asp-for="RoomCount" type="number" min="1" data-auto-calc="true" />
+            </label>
+        </div>
+
+        <hr />
+
+        <div class="current-rate-fields">
+            <div class="current-rate-meal-group">
+                <label class="checkbox-line">
+                    <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" data-auto-calc="true" />
+                    Include Breakfast
+                </label>
+
+                <label>
+                    Adult Breakfast People (@Model.BreakfastPrice.ToString("0.###") per person per night)
+                    <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" data-auto-calc="true" />
+                </label>
+
+                <label>
+                    Child Breakfast People (@Model.ChildBreakfastPrice.ToString("0.###") per child per night, @Model.ChildBreakfastDiscountPercent.ToString("0.##")% discount)
+                    <input id="childBreakfastPeople" asp-for="ChildBreakfastPeople" type="number" min="0" data-auto-calc="true" />
+                </label>
+            </div>
+
+            <div class="current-rate-meal-group">
+                <label class="checkbox-line">
+                    <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" data-auto-calc="true" />
+                    Include Lunch
+                </label>
+
+                <label>
+                    Adult Lunch People (@Model.LunchPrice.ToString("0.###") per person per night)
+                    <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" data-auto-calc="true" />
+                </label>
+
+                <label>
+                    Child Lunch People (@Model.ChildLunchPrice.ToString("0.###") per child per night, @Model.ChildLunchDiscountPercent.ToString("0.##")% discount)
+                    <input id="childLunchPeople" asp-for="ChildLunchPeople" type="number" min="0" data-auto-calc="true" />
+                </label>
+            </div>
+        </div>
+
+        <div class="hint">
+            Tax is currently @Model.TaxPercent.ToString("0.####")% and can be changed from Settings.
+            Child meal discounts can also be changed from Settings.
+        </div>
+    </section>
+
+    <div class="current-rate-result-stack">
+        <section class="card" id="resultCard" style="display:none;">
+            <h2>Price Details</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
+                <div class="stat-card"><span id="breakfastTotal">0</span><label>Adult Breakfast</label></div>
+                <div class="stat-card"><span id="childBreakfastTotal">0</span><label>Child Breakfast</label></div>
+                <div class="stat-card"><span id="lunchTotal">0</span><label>Adult Lunch</label></div>
+                <div class="stat-card"><span id="childLunchTotal">0</span><label>Child Lunch</label></div>
+                <div class="stat-card"><span id="mealTotal">0</span><label>Meals Total</label></div>
+                <div class="stat-card"><span id="subtotal">0</span><label>Subtotal</label></div>
+                <div class="stat-card"><span id="taxAmount">0</span><label id="taxLabel">Tax</label></div>
+                <div class="stat-card"><span id="grandTotal">0</span><label>Grand Total</label></div>
+            </div>
+
+            <h3>Nightly Room Breakdown</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Room Rate</th>
+                        <th>Rooms</th>
+                        <th>Room Total</th>
+                    </tr>
+                </thead>
+                <tbody id="breakdownBody"></tbody>
+            </table>
+        </section>
+
+        <section class="card" id="errorCard" style="display:none;">
+            <h2>Unable to calculate</h2>
+            <p id="errorMessage"></p>
+        </section>
     </div>
-
-    <hr />
-
-    <div class="form-grid">
-        <label class="checkbox-line">
-            <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" data-auto-calc="true" />
-            Include Breakfast
-        </label>
-
-        <label>
-            Adult Breakfast People (@Model.BreakfastPrice.ToString("0.###") per person per night)
-            <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" data-auto-calc="true" />
-        </label>
-
-        <label>
-            Child Breakfast People (@Model.ChildBreakfastPrice.ToString("0.###") per child per night, @Model.ChildBreakfastDiscountPercent.ToString("0.##")% discount)
-            <input id="childBreakfastPeople" asp-for="ChildBreakfastPeople" type="number" min="0" data-auto-calc="true" />
-        </label>
-
-        <label class="checkbox-line">
-            <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" data-auto-calc="true" />
-            Include Lunch
-        </label>
-
-        <label>
-            Adult Lunch People (@Model.LunchPrice.ToString("0.###") per person per night)
-            <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" data-auto-calc="true" />
-        </label>
-
-        <label>
-            Child Lunch People (@Model.ChildLunchPrice.ToString("0.###") per child per night, @Model.ChildLunchDiscountPercent.ToString("0.##")% discount)
-            <input id="childLunchPeople" asp-for="ChildLunchPeople" type="number" min="0" data-auto-calc="true" />
-        </label>
-    </div>
-
-    <div class="hint">
-        Tax is currently @Model.TaxPercent.ToString("0.####")% and can be changed from Settings.
-        Child meal discounts can also be changed from Settings.
-    </div>
-</section>
-
-<section class="card" id="resultCard" style="display:none;">
-    <h2>Price Details</h2>
-    <div class="stats-grid">
-        <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
-        <div class="stat-card"><span id="breakfastTotal">0</span><label>Adult Breakfast</label></div>
-        <div class="stat-card"><span id="childBreakfastTotal">0</span><label>Child Breakfast</label></div>
-        <div class="stat-card"><span id="lunchTotal">0</span><label>Adult Lunch</label></div>
-        <div class="stat-card"><span id="childLunchTotal">0</span><label>Child Lunch</label></div>
-        <div class="stat-card"><span id="mealTotal">0</span><label>Meals Total</label></div>
-        <div class="stat-card"><span id="subtotal">0</span><label>Subtotal</label></div>
-        <div class="stat-card"><span id="taxAmount">0</span><label id="taxLabel">Tax</label></div>
-        <div class="stat-card"><span id="grandTotal">0</span><label>Grand Total</label></div>
-    </div>
-
-    <h3>Nightly Room Breakdown</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Room Rate</th>
-                <th>Rooms</th>
-                <th>Room Total</th>
-            </tr>
-        </thead>
-        <tbody id="breakdownBody"></tbody>
-    </table>
-</section>
-
-<section class="card" id="errorCard" style="display:none;">
-    <h2>Unable to calculate</h2>
-    <p id="errorMessage"></p>
-</section>
+</div>
 
 @section Scripts {
 <script>
