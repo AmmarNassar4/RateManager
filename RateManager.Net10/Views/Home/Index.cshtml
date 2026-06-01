@@ -1,35 +1,38 @@
 @model List<RateGenerationBatch>
 @{
-    ViewData["Title"] = "الرئيسية";
+    ViewData["Title"] = "Home";
 }
 
 <section class="page-header">
-    <h1>إدارة أسعار الغرف</h1>
-    <p>حساب أسعار 30 يوم، تعديل يدوي، أو استيراد مباشر من Excel.</p>
+    <h1>Room Rate Management</h1>
+    <p>Generate rates, apply manual overrides, or import rates directly from Excel.</p>
 </section>
 
 <div class="stats-grid">
-    <div class="stat-card"><span>@ViewBag.BatchCount</span><label>دفعات</label></div>
-    <div class="stat-card"><span>@ViewBag.DailyRateCount</span><label>أسعار يومية</label></div>
-    <div class="stat-card"><span>@ViewBag.RoomCount</span><label>أنواع غرف</label></div>
-    <div class="stat-card"><span>@ViewBag.RatePlanCount</span><label>خطط أسعار</label></div>
+    <div class="stat-card"><span>@ViewBag.BatchCount</span><label>Batches</label></div>
+    <div class="stat-card"><span>@ViewBag.DailyRateCount</span><label>Daily Rates</label></div>
+    <div class="stat-card"><span>@ViewBag.RoomCount</span><label>Room Types</label></div>
+    <div class="stat-card"><span>@ViewBag.RatePlanCount</span><label>Rate Plans</label></div>
 </div>
 
-<div class="actions-row">
-    <a class="button primary" asp-controller="Rates" asp-action="Generate">حساب أسعار جديدة</a>
-    <a class="button" asp-controller="Rates" asp-action="ImportExcel">استيراد من Excel</a>
-</div>
+@if (User.IsInRole("Admin"))
+{
+    <div class="actions-row">
+        <a class="button primary" asp-controller="Rates" asp-action="Generate">Generate New Rates</a>
+        <a class="button" asp-controller="Rates" asp-action="ImportExcel">Import from Excel</a>
+    </div>
+}
 
 <section class="card">
-    <h2>آخر الدفعات</h2>
+    <h2>Recent Batches</h2>
     <table class="data-table">
         <thead>
             <tr>
-                <th>رقم</th>
-                <th>المصدر</th>
-                <th>الخطة</th>
-                <th>الفترة</th>
-                <th>الأيام</th>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Plan</th>
+                <th>Period</th>
+                <th>Days</th>
                 <th></th>
             </tr>
         </thead>
@@ -42,7 +45,7 @@
                 <td>@batch.RatePlan?.RatePlanName</td>
                 <td>@batch.StartDate.ToString("yyyy-MM-dd") - @batch.EndDate.ToString("yyyy-MM-dd")</td>
                 <td>@batch.NumberOfDays</td>
-                <td><a asp-controller="Rates" asp-action="Calendar" asp-route-batchId="@batch.RateGenerationBatchId">عرض</a></td>
+                <td><a asp-controller="Rates" asp-action="Calendar" asp-route-batchId="@batch.RateGenerationBatchId">View</a></td>
             </tr>
         }
         </tbody>
