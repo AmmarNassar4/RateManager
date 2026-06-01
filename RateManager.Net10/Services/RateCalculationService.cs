@@ -38,6 +38,11 @@ public class RateCalculationService : IRateCalculationService
             throw new InvalidOperationException("At least one room row is required.");
         }
 
+        var configuredWeekendDays = await _db.WeekendDaySettings
+            .Where(x => x.Enabled)
+            .Select(x => x.Weekday)
+            .ToListAsync();
+
         var endDate = model.StartDate.AddDays(model.NumberOfDays - 1);
         var batch = new RateGenerationBatch
         {
@@ -47,6 +52,7 @@ public class RateCalculationService : IRateCalculationService
             EndDate = endDate,
             NumberOfDays = model.NumberOfDays,
             GlobalAdjustmentPercent = model.GlobalAdjustmentPercent,
+            WeekendAdjustmentPercent = model.WeekendAdjustmentPercent,
             Notes = model.Notes,
             CreatedBy = userName
         };
@@ -70,8 +76,10 @@ public class RateCalculationService : IRateCalculationService
             {
                 var date = model.StartDate.AddDays(offset);
                 var dateTime = date.ToDateTime(TimeOnly.MinValue);
+                var isWeekend = configuredWeekendDays.Contains(dateTime.DayOfWeek);
+                var weekendPercent = isWeekend ? model.WeekendAdjustmentPercent : 0;
                 var rulePercent = GetRulePercent(rules, room.RoomTypeId, date, dateTime.DayOfWeek);
-                var totalPercent = model.GlobalAdjustmentPercent + roomInput.RoomAdjustmentPercent + rulePercent;
+                var totalPercent = model.GlobalAdjustmentPercent + roomInput.RoomAdjustmentPercent + weekendPercent + rulePercent;
                 var calculated = CalculateRate(roomInput.BaseRate, totalPercent);
 
                 _db.DailyRoomRates.Add(new DailyRoomRate
@@ -81,13 +89,14 @@ public class RateCalculationService : IRateCalculationService
                     RoomTypeId = room.RoomTypeId,
                     RateDate = date,
                     DayName = dateTime.DayOfWeek.ToString(),
+                    IsWeekend = isWeekend,
                     GuestCount = roomInput.GuestCount,
                     RoomCount = roomInput.RoomCount,
                     BaseRate = roomInput.BaseRate,
                     TotalAdjustmentPercent = totalPercent,
                     CalculatedRate = calculated,
                     FinalRate = calculated,
-                    CalculationNote = BuildCalculationNote(model.GlobalAdjustmentPercent, roomInput.RoomAdjustmentPercent, rulePercent),
+                    CalculationNote = BuildCalculationNote(model.GlobalAdjustmentPercent, roomInput.RoomAdjustmentPercent, weekendPercent, rulePercent),
                     CreatedBy = userName
                 });
             }
@@ -182,8 +191,8 @@ public class RateCalculationService : IRateCalculationService
         return result;
     }
 
-    private static string BuildCalculationNote(decimal globalPercent, decimal roomPercent, decimal rulePercent)
+    private static string BuildCalculationNote(decimal globalPercent, decimal roomPercent, decimal weekendPercent, decimal rulePercent)
     {
-        return $"Global {globalPercent:0.####}% + Room {roomPercent:0.####}% + Rules {rulePercent:0.####}%";
+        return $"Global {globalPercent:0.####}% + Room {roomPercent:0.####}% + Weekend {weekendPercent:0.####}% + Rules {rulePercent:0.####}%";
     }
 }
