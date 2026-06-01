@@ -5,7 +5,7 @@
 
 <section class="page-header">
     <h1>استيراد الأسعار من Excel</h1>
-    <p>اختر ملف Excel من جهازك، وسيتم أخذ الأسعار منه بدل الحساب اليدوي.</p>
+    <p>اختر ملف Excel من جهازك، وسيتم استيراد السعر بدون خصم والسعر بالخصم من نفس الملف.</p>
 </section>
 
 <form asp-action="ImportExcel" method="post" enctype="multipart/form-data" class="card form-card">
@@ -13,8 +13,20 @@
 
     <div class="form-grid">
         <label>
-            خطة السعر
+            خطة السعر بدون خصم
             <select asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+        </label>
+
+        <label>
+            خطة السعر بالخصم
+            <select asp-for="DiscountRatePlanId" asp-items="Model.RatePlans">
+                <option value="">لا تستورد الخصم</option>
+            </select>
+        </label>
+
+        <label>
+            نسبة الخصم الافتراضية %
+            <input asp-for="DiscountPercent" type="number" min="0" max="100" step="0.01" />
         </label>
 
         <label>
@@ -58,8 +70,8 @@
     </label>
 
     <div class="hint">
-        يدعم الاستيراد جدولًا عاديًا فيه أعمدة Date / RoomType / Rate، أو Matrix حيث التواريخ في الأعمدة وأنواع الغرف في الصفوف.
-        يفضّل استخدام ملفات .xlsx أو .xlsm.
+        سيحاول النظام اكتشاف قسم الخصم داخل نفس الملف من كلمات مثل Discount / Family / Friends / 25%.
+        إذا لم يجد قسم خصم واضحًا، سيتم حساب السعر المخفض من السعر بدون خصم حسب نسبة الخصم الافتراضية.
     </div>
 
     <div class="actions-row">
