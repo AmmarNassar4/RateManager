@@ -29,12 +29,20 @@
             نسبة زيادة/نقصان عامة %
             <input asp-for="GlobalAdjustmentPercent" type="number" step="0.01" />
         </label>
+        <label>
+            نسبة خاصة للـ Weekend %
+            <input asp-for="WeekendAdjustmentPercent" type="number" step="0.01" />
+        </label>
     </div>
 
     <label>
         ملاحظات
         <input asp-for="Notes" />
     </label>
+
+    <div class="hint">
+        نسبة الـ Weekend تطبق فقط على الأيام المحددة كـ Weekend من شاشة الإعدادات.
+    </div>
 
     <hr />
     <div class="section-title-row">
