@@ -6,6 +6,8 @@ public class SettingsViewModel
 {
     public List<RoomType> RoomTypes { get; set; } = new();
     public List<RatePlan> RatePlans { get; set; } = new();
+    public List<AppUser> Users { get; set; } = new();
+    public List<WeekendDaySetting> WeekendDays { get; set; } = new();
 }
 
 public class CreateRoomTypeInput
@@ -20,4 +22,9 @@ public class CreateRatePlanInput
     public string RatePlanName { get; set; } = string.Empty;
     public string? MealPlanCode { get; set; }
     public string CurrencyCode { get; set; } = "SAR";
+}
+
+public class UpdateWeekendDaysInput
+{
+    public List<DayOfWeek> WeekendDays { get; set; } = new();
 }
