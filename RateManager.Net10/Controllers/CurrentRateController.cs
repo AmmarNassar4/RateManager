@@ -31,6 +31,7 @@ public class CurrentRateController : Controller
             RoomCount = 1,
             BreakfastPrice = mealPrices?.BreakfastPrice ?? 0,
             LunchPrice = mealPrices?.LunchPrice ?? 0,
+            TaxPercent = mealPrices?.TaxPercent ?? 15,
             RatePlans = await _db.RatePlans
                 .Where(x => x.IsActive)
                 .OrderBy(x => x.RatePlanName)
