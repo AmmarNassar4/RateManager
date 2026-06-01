@@ -58,6 +58,11 @@ public static class SeedData
             }
         }
 
+        if (!db.MealPriceSettings.Any())
+        {
+            db.MealPriceSettings.Add(new MealPriceSetting { BreakfastPrice = 50, LunchPrice = 100 });
+        }
+
         db.SaveChanges();
     }
 }
