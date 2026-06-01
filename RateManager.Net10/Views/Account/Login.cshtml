@@ -1,11 +1,11 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "تسجيل الدخول";
+    ViewData["Title"] = "Login";
 }
 
 <section class="page-header">
-    <h1>تسجيل الدخول</h1>
-    <p>ادخل باسم المستخدم وكلمة المرور للوصول إلى النظام.</p>
+    <h1>Login</h1>
+    <p>Enter your username and password to access the system.</p>
 </section>
 
 <form asp-action="Login" method="post" class="card form-card auth-card">
@@ -13,22 +13,22 @@
     <input asp-for="ReturnUrl" type="hidden" />
 
     <label>
-        اسم المستخدم
+        Username
         <input asp-for="UserName" autocomplete="username" autofocus />
     </label>
 
     <label>
-        كلمة المرور
+        Password
         <input asp-for="Password" type="password" autocomplete="current-password" />
     </label>
 
     <label class="checkbox-line">
         <input asp-for="RememberMe" type="checkbox" />
-        تذكرني
+        Remember me
     </label>
 
     <div class="actions-row">
-        <button type="submit" class="button primary">دخول</button>
+        <button type="submit" class="button primary">Login</button>
     </div>
 
     <div class="hint">
