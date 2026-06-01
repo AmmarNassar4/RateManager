@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using RateManager.Net10.ViewModels;
 
 namespace RateManager.Net10.Controllers;
 
+[Authorize]
 public class RatesController : Controller
 {
     private readonly AppDbContext _db;
@@ -20,6 +22,7 @@ public class RatesController : Controller
         _excelImportService = excelImportService;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> Generate()
     {
@@ -36,6 +39,7 @@ public class RatesController : Controller
         return View(model);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Generate(GenerateRatesViewModel model)
@@ -53,6 +57,7 @@ public class RatesController : Controller
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> ImportExcel()
     {
@@ -67,9 +72,9 @@ public class RatesController : Controller
         return View(model);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    // Excel upload is bound through ExcelImportViewModel.ExcelFile.
     public async Task<IActionResult> ImportExcel(ExcelImportViewModel model)
     {
         try
@@ -108,6 +113,7 @@ public class RatesController : Controller
         return View(new CalendarViewModel { Batch = batch, Rates = rates });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> UpdateManualRate([FromBody] ManualRateUpdateInput input)
     {
