@@ -1,23 +1,23 @@
 @model SettingsViewModel
 @{
-    ViewData["Title"] = "الإعدادات";
+    ViewData["Title"] = "Settings";
 }
 
 <section class="page-header">
-    <h1>الإعدادات</h1>
-    <p>إعدادات واضحة مستقلة عن أسماء نظام الـ PMS القديم.</p>
+    <h1>Settings</h1>
+    <p>Clear application settings independent from any legacy PMS table names.</p>
 </section>
 
 <div class="settings-grid">
     <section class="card">
-        <h2>أنواع الغرف</h2>
+        <h2>Room Types</h2>
         <form asp-action="AddRoomType" method="post" class="inline-form">
             <input name="RoomCode" placeholder="Room Code" />
             <input name="RoomName" placeholder="Room Name" />
-            <button class="button small" type="submit">إضافة</button>
+            <button class="button small" type="submit">Add</button>
         </form>
         <table class="data-table">
-            <thead><tr><th>الكود</th><th>الاسم</th><th>نشط</th></tr></thead>
+            <thead><tr><th>Code</th><th>Name</th><th>Active</th></tr></thead>
             <tbody>
             @foreach (var room in Model.RoomTypes)
             {
@@ -28,16 +28,16 @@
     </section>
 
     <section class="card">
-        <h2>خطط الأسعار</h2>
+        <h2>Rate Plans</h2>
         <form asp-action="AddRatePlan" method="post" class="inline-form">
             <input name="RatePlanCode" placeholder="Rate Plan Code" />
             <input name="RatePlanName" placeholder="Rate Plan Name" />
             <input name="MealPlanCode" placeholder="Meal Plan" />
             <input name="CurrencyCode" value="SAR" placeholder="Currency" />
-            <button class="button small" type="submit">إضافة</button>
+            <button class="button small" type="submit">Add</button>
         </form>
         <table class="data-table">
-            <thead><tr><th>الكود</th><th>الاسم</th><th>Meal</th><th>Currency</th></tr></thead>
+            <thead><tr><th>Code</th><th>Name</th><th>Meal</th><th>Currency</th></tr></thead>
             <tbody>
             @foreach (var plan in Model.RatePlans)
             {
@@ -48,18 +48,18 @@
     </section>
 
     <section class="card">
-        <h2>المستخدمون</h2>
+        <h2>Users</h2>
         <form asp-action="AddUser" method="post" class="inline-form">
             <input name="UserName" placeholder="Username" />
             <input name="Password" type="password" placeholder="Password" />
             <select name="Role">
-                <option value="Viewer">Viewer - مشاهدة فقط</option>
-                <option value="Admin">Admin - صلاحيات كاملة</option>
+                <option value="Viewer">Viewer - read only</option>
+                <option value="Admin">Admin - full access</option>
             </select>
-            <button class="button small" type="submit">إضافة مستخدم</button>
+            <button class="button small" type="submit">Add User</button>
         </form>
         <table class="data-table">
-            <thead><tr><th>اسم المستخدم</th><th>الدور</th><th>نشط</th></tr></thead>
+            <thead><tr><th>Username</th><th>Role</th><th>Active</th></tr></thead>
             <tbody>
             @foreach (var user in Model.Users)
             {
@@ -70,8 +70,8 @@
     </section>
 
     <section class="card">
-        <h2>أيام الـ Weekend</h2>
-        <p class="hint">اختر الأيام التي تعتبر Weekend. نسبة الـ Weekend في شاشة الحساب ستطبق فقط على هذه الأيام.</p>
+        <h2>Weekend Days</h2>
+        <p class="hint">Select which days should be treated as weekends. The weekend adjustment in the generation screen will only apply to these days.</p>
         <form asp-action="UpdateWeekendDays" method="post">
             <div class="checkbox-grid">
                 @foreach (var day in Model.WeekendDays)
@@ -83,7 +83,7 @@
                 }
             </div>
             <div class="actions-row">
-                <button type="submit" class="button primary">حفظ أيام Weekend</button>
+                <button type="submit" class="button primary">Save Weekend Days</button>
             </div>
         </form>
     </section>
