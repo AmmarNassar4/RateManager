@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<RateAuditLog> RateAuditLogs => Set<RateAuditLog>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<WeekendDaySetting> WeekendDaySettings => Set<WeekendDaySetting>();
+    public DbSet<MealPriceSetting> MealPriceSettings => Set<MealPriceSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,6 +113,12 @@ public class AppDbContext : DbContext
         {
             entity.HasIndex(x => x.Weekday).IsUnique();
             entity.Property(x => x.Weekday).HasConversion<string>().HasMaxLength(20).IsRequired();
+        });
+
+        modelBuilder.Entity<MealPriceSetting>(entity =>
+        {
+            entity.Property(x => x.BreakfastPrice).HasColumnType("decimal(18,3)");
+            entity.Property(x => x.LunchPrice).HasColumnType("decimal(18,3)");
         });
 
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(entityType => entityType.GetForeignKeys()))
