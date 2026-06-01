@@ -10,11 +10,11 @@ public static class SeedData
         if (!db.RoomTypes.Any())
         {
             db.RoomTypes.AddRange(
-                new RoomType { RoomCode = "STD-KING", RoomName = "Standard King Room" },
-                new RoomType { RoomCode = "STD-TWIN", RoomName = "Standard Twin Room" },
-                new RoomType { RoomCode = "JUNIOR-SUITE", RoomName = "Junior Suite" },
-                new RoomType { RoomCode = "EXEC-SUITE", RoomName = "Executive Suite" },
-                new RoomType { RoomCode = "ELITE-SUITE", RoomName = "Elite Suite" }
+                //new RoomType { RoomCode = "STD-KING", RoomName = "Standard King Room" },
+                //new RoomType { RoomCode = "STD-TWIN", RoomName = "Standard Twin Room" },
+                //new RoomType { RoomCode = "JUNIOR-SUITE", RoomName = "Junior Suite" },
+                //new RoomType { RoomCode = "EXEC-SUITE", RoomName = "Executive Suite" },
+                //new RoomType { RoomCode = "ELITE-SUITE", RoomName = "Elite Suite" }
             );
         }
 
