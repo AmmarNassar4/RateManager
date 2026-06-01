@@ -41,27 +41,38 @@
     <div class="form-grid">
         <label class="checkbox-line">
             <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" data-auto-calc="true" />
-            Include Breakfast (@Model.BreakfastPrice.ToString("0.###") per person per night)
+            Include Breakfast
         </label>
 
         <label>
-            Breakfast People
+            Adult Breakfast People (@Model.BreakfastPrice.ToString("0.###") per person per night)
             <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" data-auto-calc="true" />
+        </label>
+
+        <label>
+            Child Breakfast People (@Model.ChildBreakfastPrice.ToString("0.###") per child per night, @Model.ChildBreakfastDiscountPercent.ToString("0.##")% discount)
+            <input id="childBreakfastPeople" asp-for="ChildBreakfastPeople" type="number" min="0" data-auto-calc="true" />
         </label>
 
         <label class="checkbox-line">
             <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" data-auto-calc="true" />
-            Include Lunch (@Model.LunchPrice.ToString("0.###") per person per night)
+            Include Lunch
         </label>
 
         <label>
-            Lunch People
+            Adult Lunch People (@Model.LunchPrice.ToString("0.###") per person per night)
             <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" data-auto-calc="true" />
+        </label>
+
+        <label>
+            Child Lunch People (@Model.ChildLunchPrice.ToString("0.###") per child per night, @Model.ChildLunchDiscountPercent.ToString("0.##")% discount)
+            <input id="childLunchPeople" asp-for="ChildLunchPeople" type="number" min="0" data-auto-calc="true" />
         </label>
     </div>
 
     <div class="hint">
         Tax is currently @Model.TaxPercent.ToString("0.####")% and can be changed from Settings.
+        Child meal discounts can also be changed from Settings.
     </div>
 </section>
 
@@ -69,8 +80,11 @@
     <h2>Price Details</h2>
     <div class="stats-grid">
         <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
-        <div class="stat-card"><span id="breakfastTotal">0</span><label>Breakfast Total</label></div>
-        <div class="stat-card"><span id="lunchTotal">0</span><label>Lunch Total</label></div>
+        <div class="stat-card"><span id="breakfastTotal">0</span><label>Adult Breakfast</label></div>
+        <div class="stat-card"><span id="childBreakfastTotal">0</span><label>Child Breakfast</label></div>
+        <div class="stat-card"><span id="lunchTotal">0</span><label>Adult Lunch</label></div>
+        <div class="stat-card"><span id="childLunchTotal">0</span><label>Child Lunch</label></div>
+        <div class="stat-card"><span id="mealTotal">0</span><label>Meals Total</label></div>
         <div class="stat-card"><span id="subtotal">0</span><label>Subtotal</label></div>
         <div class="stat-card"><span id="taxAmount">0</span><label id="taxLabel">Tax</label></div>
         <div class="stat-card"><span id="grandTotal">0</span><label>Grand Total</label></div>
@@ -112,8 +126,10 @@
         params.set('roomCount', document.getElementById('roomCount').value);
         params.set('includeBreakfast', document.getElementById('includeBreakfast').checked);
         params.set('breakfastPeople', document.getElementById('breakfastPeople').value || '0');
+        params.set('childBreakfastPeople', document.getElementById('childBreakfastPeople').value || '0');
         params.set('includeLunch', document.getElementById('includeLunch').checked);
         params.set('lunchPeople', document.getElementById('lunchPeople').value || '0');
+        params.set('childLunchPeople', document.getElementById('childLunchPeople').value || '0');
         return params.toString();
     }
 
@@ -146,7 +162,10 @@
 
         document.getElementById('roomTotal').textContent = money(payload.roomTotal);
         document.getElementById('breakfastTotal').textContent = money(payload.breakfastTotal);
+        document.getElementById('childBreakfastTotal').textContent = money(payload.childBreakfastTotal);
         document.getElementById('lunchTotal').textContent = money(payload.lunchTotal);
+        document.getElementById('childLunchTotal').textContent = money(payload.childLunchTotal);
+        document.getElementById('mealTotal').textContent = money(payload.mealTotal);
         document.getElementById('subtotal').textContent = money(payload.subtotal);
         document.getElementById('taxAmount').textContent = money(payload.taxAmount);
         document.getElementById('taxLabel').textContent = `Tax (${Number(payload.taxPercent || 0).toFixed(2)}%)`;
