@@ -1,0 +1,149 @@
+@model CurrentRateCalculatorViewModel
+@{
+    ViewData["Title"] = "Current Rate Calculator";
+}
+
+<section class="page-header">
+    <h1>Current Rate Calculator</h1>
+    <p>Calculate the current total using the latest saved daily rate for each night.</p>
+</section>
+
+<section class="card form-card">
+    <div class="form-grid">
+        <label>
+            Rate Plan
+            <select id="ratePlanId" asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
+        </label>
+
+        <label>
+            Room Type
+            <select id="roomTypeId" asp-for="RoomTypeId" asp-items="Model.RoomTypes"></select>
+        </label>
+
+        <label>
+            Start Date
+            <input id="startDate" asp-for="StartDate" type="date" />
+        </label>
+
+        <label>
+            Nights
+            <input id="nights" asp-for="Nights" type="number" min="1" max="365" />
+        </label>
+
+        <label>
+            Room Count
+            <input id="roomCount" asp-for="RoomCount" type="number" min="1" />
+        </label>
+    </div>
+
+    <hr />
+
+    <div class="form-grid">
+        <label class="checkbox-line">
+            <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" />
+            Include Breakfast (@Model.BreakfastPrice.ToString("0.###") per person per night)
+        </label>
+
+        <label>
+            Breakfast People
+            <input id="breakfastPeople" asp-for="BreakfastPeople" type="number" min="0" />
+        </label>
+
+        <label class="checkbox-line">
+            <input id="includeLunch" asp-for="IncludeLunch" type="checkbox" />
+            Include Lunch (@Model.LunchPrice.ToString("0.###") per person per night)
+        </label>
+
+        <label>
+            Lunch People
+            <input id="lunchPeople" asp-for="LunchPeople" type="number" min="0" />
+        </label>
+    </div>
+
+    <div class="actions-row">
+        <button type="button" class="button primary" onclick="calculateCurrentRate()">Calculate</button>
+    </div>
+</section>
+
+<section class="card" id="resultCard" style="display:none;">
+    <h2>Result</h2>
+    <div class="stats-grid">
+        <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
+        <div class="stat-card"><span id="breakfastTotal">0</span><label>Breakfast Total</label></div>
+        <div class="stat-card"><span id="lunchTotal">0</span><label>Lunch Total</label></div>
+        <div class="stat-card"><span id="grandTotal">0</span><label>Grand Total</label></div>
+    </div>
+
+    <h3>Nightly Breakdown</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Room Rate</th>
+                <th>Rooms</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody id="breakdownBody"></tbody>
+    </table>
+</section>
+
+<section class="card" id="errorCard" style="display:none;">
+    <h2>Unable to calculate</h2>
+    <p id="errorMessage"></p>
+</section>
+
+@section Scripts {
+<script>
+    function money(value) {
+        return Number(value || 0).toFixed(3);
+    }
+
+    function buildQuery() {
+        const params = new URLSearchParams();
+        params.set('ratePlanId', document.getElementById('ratePlanId').value);
+        params.set('roomTypeId', document.getElementById('roomTypeId').value);
+        params.set('startDate', document.getElementById('startDate').value);
+        params.set('nights', document.getElementById('nights').value);
+        params.set('roomCount', document.getElementById('roomCount').value);
+        params.set('includeBreakfast', document.getElementById('includeBreakfast').checked);
+        params.set('breakfastPeople', document.getElementById('breakfastPeople').value || '0');
+        params.set('includeLunch', document.getElementById('includeLunch').checked);
+        params.set('lunchPeople', document.getElementById('lunchPeople').value || '0');
+        return params.toString();
+    }
+
+    async function calculateCurrentRate() {
+        document.getElementById('resultCard').style.display = 'none';
+        document.getElementById('errorCard').style.display = 'none';
+
+        const response = await fetch(`/api/current-rate/calculate?${buildQuery()}`);
+        const payload = await response.json();
+
+        if (!response.ok) {
+            document.getElementById('errorMessage').textContent = payload.message || 'Calculation failed.';
+            document.getElementById('errorCard').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('roomTotal').textContent = money(payload.roomTotal);
+        document.getElementById('breakfastTotal').textContent = money(payload.breakfastTotal);
+        document.getElementById('lunchTotal').textContent = money(payload.lunchTotal);
+        document.getElementById('grandTotal').textContent = money(payload.grandTotal);
+
+        const body = document.getElementById('breakdownBody');
+        body.innerHTML = '';
+        for (const row of payload.nightsBreakdown) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.date}</td>
+                <td>${money(row.roomRate)}</td>
+                <td>${row.roomCount}</td>
+                <td>${money(row.roomTotal)}</td>`;
+            body.appendChild(tr);
+        }
+
+        document.getElementById('resultCard').style.display = 'block';
+    }
+</script>
+}
