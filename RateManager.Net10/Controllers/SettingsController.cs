@@ -22,13 +22,15 @@ public class SettingsController : Controller
     public async Task<IActionResult> Index()
     {
         await EnsureWeekendRowsAsync();
+        await EnsureMealPriceSettingsAsync();
 
         var model = new SettingsViewModel
         {
             RoomTypes = await _db.RoomTypes.OrderBy(x => x.RoomName).ToListAsync(),
             RatePlans = await _db.RatePlans.OrderBy(x => x.RatePlanName).ToListAsync(),
             Users = await _db.AppUsers.OrderBy(x => x.UserName).ToListAsync(),
-            WeekendDays = await _db.WeekendDaySettings.OrderBy(x => x.Weekday).ToListAsync()
+            WeekendDays = await _db.WeekendDaySettings.OrderBy(x => x.Weekday).ToListAsync(),
+            MealPrices = await _db.MealPriceSettings.OrderBy(x => x.MealPriceSettingId).FirstAsync()
         };
 
         return View(model);
@@ -114,6 +116,19 @@ public class SettingsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateMealPrices(UpdateMealPricesInput input)
+    {
+        await EnsureMealPriceSettingsAsync();
+        var settings = await _db.MealPriceSettings.OrderBy(x => x.MealPriceSettingId).FirstAsync();
+        settings.BreakfastPrice = input.BreakfastPrice;
+        settings.LunchPrice = input.LunchPrice;
+        settings.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task EnsureWeekendRowsAsync()
     {
         foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
@@ -129,5 +144,19 @@ public class SettingsController : Controller
         }
 
         await _db.SaveChangesAsync();
+    }
+
+    private async Task EnsureMealPriceSettingsAsync()
+    {
+        if (!await _db.MealPriceSettings.AnyAsync())
+        {
+            _db.MealPriceSettings.Add(new MealPriceSetting
+            {
+                BreakfastPrice = 50,
+                LunchPrice = 100
+            });
+
+            await _db.SaveChangesAsync();
+        }
     }
 }
