@@ -1,11 +1,11 @@
 @model ExcelImportViewModel
 @{
-    ViewData["Title"] = "استيراد Excel";
+    ViewData["Title"] = "Import Excel";
 }
 
 <section class="page-header">
-    <h1>استيراد الأسعار من Excel</h1>
-    <p>اختر ملف Excel من جهازك، وسيتم استيراد السعر بدون خصم والسعر بالخصم من نفس الملف.</p>
+    <h1>Import Rates from Excel</h1>
+    <p>Select an Excel file to import both regular and discounted rates from the same file.</p>
 </section>
 
 <form asp-action="ImportExcel" method="post" enctype="multipart/form-data" class="card form-card">
@@ -13,69 +13,69 @@
 
     <div class="form-grid">
         <label>
-            خطة السعر بدون خصم
+            Regular Rate Plan
             <select asp-for="RatePlanId" asp-items="Model.RatePlans"></select>
         </label>
 
         <label>
-            خطة السعر بالخصم
+            Discounted Rate Plan
             <select asp-for="DiscountRatePlanId" asp-items="Model.RatePlans">
-                <option value="">لا تستورد الخصم</option>
+                <option value="">Do not import discounted rates</option>
             </select>
         </label>
 
         <label>
-            نسبة الخصم الافتراضية %
+            Default Discount %
             <input asp-for="DiscountPercent" type="number" min="0" max="100" step="0.01" />
         </label>
 
         <label>
-            تاريخ البداية
+            Start Date
             <input asp-for="StartDate" type="date" />
         </label>
 
         <label>
-            عدد الأيام
+            Number of Days
             <input asp-for="NumberOfDays" type="number" min="1" max="365" />
         </label>
 
         <label>
-            عدد النزلاء الافتراضي
+            Default Guest Count
             <input asp-for="DefaultGuestCount" type="number" min="1" />
         </label>
 
         <label>
-            عدد الغرف الافتراضي
+            Default Room Count
             <input asp-for="DefaultRoomCount" type="number" min="1" />
         </label>
     </div>
 
     <label>
-        اختر ملف Excel
+        Excel File
         <input asp-for="ExcelFile" type="file" accept=".xlsx,.xlsm,.xltx,.xltm" />
         <span asp-validation-for="ExcelFile" class="validation"></span>
     </label>
 
     <details class="hint">
-        <summary>اختياري: استخدام مسار ملف على السيرفر بدل اختيار ملف</summary>
+        <summary>Optional: use a server-side file path instead of uploading a file</summary>
         <label>
-            مسار ملف Excel على السيرفر
+            Server-side Excel File Path
             <input asp-for="ExcelFilePath" placeholder="C:/Rates/Weekly Walk-In Rates.xlsx" />
         </label>
     </details>
 
     <label>
-        ملاحظات
+        Notes
         <input asp-for="Notes" />
     </label>
 
     <div class="hint">
-        سيحاول النظام اكتشاف قسم الخصم داخل نفس الملف من كلمات مثل Discount / Family / Friends / 25%.
-        إذا لم يجد قسم خصم واضحًا، سيتم حساب السعر المخفض من السعر بدون خصم حسب نسبة الخصم الافتراضية.
+        The system will try to detect the discounted section in the same file using words such as Discount, Family, Friends, or 25%.
+        If no discounted section is found, the discounted rates will be calculated from regular rates using the default discount percentage.
     </div>
 
     <div class="actions-row">
         <button type="submit" class="button primary">Import</button>
-        <a asp-controller="Home" asp-action="Index" class="button muted">إلغاء</a>
+        <a asp-controller="Home" asp-action="Index" class="button muted">Cancel</a>
     </div>
 </form>
