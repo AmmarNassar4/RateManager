@@ -48,6 +48,22 @@
     </section>
 
     <section class="card">
+        <h2>Meal Prices</h2>
+        <p class="hint">These fixed prices are used by the Current Rate Calculator.</p>
+        <form asp-action="UpdateMealPrices" method="post" class="inline-form">
+            <label>
+                Breakfast Price
+                <input name="BreakfastPrice" value="@Model.MealPrices.BreakfastPrice.ToString("0.###")" type="number" min="0" step="0.001" />
+            </label>
+            <label>
+                Lunch Price
+                <input name="LunchPrice" value="@Model.MealPrices.LunchPrice.ToString("0.###")" type="number" min="0" step="0.001" />
+            </label>
+            <button class="button small" type="submit">Save Meal Prices</button>
+        </form>
+    </section>
+
+    <section class="card">
         <h2>Users</h2>
         <form asp-action="AddUser" method="post" class="inline-form">
             <input name="UserName" placeholder="Username" />
