@@ -32,7 +32,7 @@ public class CurrentRateCalculatorService : ICurrentRateCalculatorService
             ?? throw new InvalidOperationException("Room type was not found.");
 
         var mealPrices = await _db.MealPriceSettings.OrderBy(x => x.MealPriceSettingId).FirstOrDefaultAsync()
-            ?? throw new InvalidOperationException("Meal price settings were not found.");
+            ?? throw new InvalidOperationException("Pricing settings were not found.");
 
         var response = new CurrentRateCalculationResponse
         {
@@ -46,7 +46,8 @@ public class CurrentRateCalculatorService : ICurrentRateCalculatorService
             BreakfastPrice = mealPrices.BreakfastPrice,
             BreakfastPeople = request.IncludeBreakfast ? Math.Max(0, request.BreakfastPeople) : 0,
             LunchPrice = mealPrices.LunchPrice,
-            LunchPeople = request.IncludeLunch ? Math.Max(0, request.LunchPeople) : 0
+            LunchPeople = request.IncludeLunch ? Math.Max(0, request.LunchPeople) : 0,
+            TaxPercent = mealPrices.TaxPercent
         };
 
         for (var offset = 0; offset < request.Nights; offset++)
@@ -79,7 +80,9 @@ public class CurrentRateCalculatorService : ICurrentRateCalculatorService
 
         response.BreakfastTotal = response.BreakfastPrice * response.BreakfastPeople * request.Nights;
         response.LunchTotal = response.LunchPrice * response.LunchPeople * request.Nights;
-        response.GrandTotal = response.RoomTotal + response.BreakfastTotal + response.LunchTotal;
+        response.Subtotal = response.RoomTotal + response.BreakfastTotal + response.LunchTotal;
+        response.TaxAmount = Math.Round(response.Subtotal * response.TaxPercent / 100m, 3, MidpointRounding.AwayFromZero);
+        response.GrandTotal = response.Subtotal + response.TaxAmount;
 
         return response;
     }
