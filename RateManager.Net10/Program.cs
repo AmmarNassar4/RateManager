@@ -7,6 +7,9 @@ using RateManager.Net10.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.Configure<SharePointExcelSyncOptions>(builder.Configuration.GetSection("SharePointSync"));
+builder.Services.AddHostedService<SharePointExcelSyncHostedService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
