@@ -46,6 +46,8 @@ public class CurrentRateCalculatorService : ICurrentRateCalculatorService
             StartDate = request.StartDate,
             Nights = request.Nights,
             RoomCount = request.RoomCount,
+            EarlyCheckIn = request.EarlyCheckIn,
+            LateCheckOut = request.LateCheckOut,
             BreakfastPrice = mealPrices.BreakfastPrice,
             BreakfastPeople = request.IncludeBreakfast ? Math.Max(0, request.BreakfastPeople) : 0,
             ChildBreakfastPrice = childBreakfastPrice,
@@ -85,12 +87,26 @@ public class CurrentRateCalculatorService : ICurrentRateCalculatorService
             response.RoomTotal += roomTotal;
         }
 
+        var firstNight = response.NightsBreakdown.FirstOrDefault();
+        var lastNight = response.NightsBreakdown.LastOrDefault();
+
+        if (request.EarlyCheckIn && firstNight != null)
+        {
+            response.EarlyCheckInTotal = Math.Round(firstNight.RoomTotal / 2m, 3, MidpointRounding.AwayFromZero);
+        }
+
+        if (request.LateCheckOut && lastNight != null)
+        {
+            response.LateCheckOutTotal = Math.Round(lastNight.RoomTotal / 2m, 3, MidpointRounding.AwayFromZero);
+        }
+
+        response.ExtraStayTotal = response.EarlyCheckInTotal + response.LateCheckOutTotal;
         response.BreakfastTotal = response.BreakfastPrice * response.BreakfastPeople * request.Nights;
         response.ChildBreakfastTotal = response.ChildBreakfastPrice * response.ChildBreakfastPeople * request.Nights;
         response.LunchTotal = response.LunchPrice * response.LunchPeople * request.Nights;
         response.ChildLunchTotal = response.ChildLunchPrice * response.ChildLunchPeople * request.Nights;
         response.MealTotal = response.BreakfastTotal + response.ChildBreakfastTotal + response.LunchTotal + response.ChildLunchTotal;
-        response.Subtotal = response.RoomTotal + response.MealTotal;
+        response.Subtotal = response.RoomTotal + response.ExtraStayTotal + response.MealTotal;
         response.TaxAmount = Math.Round(response.Subtotal * response.TaxPercent / 100m, 3, MidpointRounding.AwayFromZero);
         response.GrandTotal = response.Subtotal + response.TaxAmount;
 
