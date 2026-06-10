@@ -89,6 +89,18 @@
         <div class="current-rate-fields">
             <div class="current-rate-meal-group">
                 <label class="checkbox-line">
+                    <input id="earlyCheckIn" asp-for="EarlyCheckIn" type="checkbox" data-auto-calc="true" />
+                    Early Check-In - half of the first night
+                </label>
+
+                <label class="checkbox-line">
+                    <input id="lateCheckOut" asp-for="LateCheckOut" type="checkbox" data-auto-calc="true" />
+                    Late Check-Out - half of the last night
+                </label>
+            </div>
+
+            <div class="current-rate-meal-group">
+                <label class="checkbox-line">
                     <input id="includeBreakfast" asp-for="IncludeBreakfast" type="checkbox" data-auto-calc="true" />
                     Include Breakfast
                 </label>
@@ -133,6 +145,9 @@
             <h2>Price Details</h2>
             <div class="stats-grid">
                 <div class="stat-card"><span id="roomTotal">0</span><label>Room Total</label></div>
+                <div class="stat-card"><span id="earlyCheckInTotal">0</span><label>Early Check-In</label></div>
+                <div class="stat-card"><span id="lateCheckOutTotal">0</span><label>Late Check-Out</label></div>
+                <div class="stat-card"><span id="extraStayTotal">0</span><label>Extra Stay Total</label></div>
                 <div class="stat-card"><span id="breakfastTotal">0</span><label>Adult Breakfast</label></div>
                 <div class="stat-card"><span id="childBreakfastTotal">0</span><label>Child Breakfast</label></div>
                 <div class="stat-card"><span id="lunchTotal">0</span><label>Adult Lunch</label></div>
@@ -179,6 +194,8 @@
         params.set('startDate', document.getElementById('startDate').value);
         params.set('nights', document.getElementById('nights').value);
         params.set('roomCount', document.getElementById('roomCount').value);
+        params.set('earlyCheckIn', document.getElementById('earlyCheckIn').checked);
+        params.set('lateCheckOut', document.getElementById('lateCheckOut').checked);
         params.set('includeBreakfast', document.getElementById('includeBreakfast').checked);
         params.set('breakfastPeople', document.getElementById('breakfastPeople').value || '0');
         params.set('childBreakfastPeople', document.getElementById('childBreakfastPeople').value || '0');
@@ -216,6 +233,9 @@
         }
 
         document.getElementById('roomTotal').textContent = money(payload.roomTotal);
+        document.getElementById('earlyCheckInTotal').textContent = money(payload.earlyCheckInTotal);
+        document.getElementById('lateCheckOutTotal').textContent = money(payload.lateCheckOutTotal);
+        document.getElementById('extraStayTotal').textContent = money(payload.extraStayTotal);
         document.getElementById('breakfastTotal').textContent = money(payload.breakfastTotal);
         document.getElementById('childBreakfastTotal').textContent = money(payload.childBreakfastTotal);
         document.getElementById('lunchTotal').textContent = money(payload.lunchTotal);
