@@ -9,6 +9,8 @@ public class CurrentRateCalculatorViewModel
     public int RatePlanId { get; set; }
     public int RoomTypeId { get; set; }
     public int RoomCount { get; set; } = 1;
+    public bool EarlyCheckIn { get; set; }
+    public bool LateCheckOut { get; set; }
     public bool IncludeBreakfast { get; set; }
     public int BreakfastPeople { get; set; } = 0;
     public int ChildBreakfastPeople { get; set; } = 0;
@@ -35,6 +37,8 @@ public class CurrentRateCalculationRequest
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public int Nights { get; set; } = 1;
     public int RoomCount { get; set; } = 1;
+    public bool EarlyCheckIn { get; set; }
+    public bool LateCheckOut { get; set; }
     public bool IncludeBreakfast { get; set; }
     public int BreakfastPeople { get; set; }
     public int ChildBreakfastPeople { get; set; }
@@ -53,6 +57,11 @@ public class CurrentRateCalculationResponse
     public int Nights { get; set; }
     public int RoomCount { get; set; }
     public decimal RoomTotal { get; set; }
+    public bool EarlyCheckIn { get; set; }
+    public decimal EarlyCheckInTotal { get; set; }
+    public bool LateCheckOut { get; set; }
+    public decimal LateCheckOutTotal { get; set; }
+    public decimal ExtraStayTotal { get; set; }
     public decimal BreakfastPrice { get; set; }
     public int BreakfastPeople { get; set; }
     public decimal BreakfastTotal { get; set; }
