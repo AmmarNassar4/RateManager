@@ -1,3 +1,4 @@
+using System.Globalization;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -245,6 +246,13 @@ public class ExcelRateImportService : IExcelRateImportService
                 continue;
             }
 
+            var ramadaFixedRows = ReadRamadaFixedLayoutSections(worksheet).ToList();
+            if (ramadaFixedRows.Any())
+            {
+                rows.AddRange(ramadaFixedRows);
+                continue;
+            }
+
             rows.AddRange(ReadNormalizedTable(worksheet));
             rows.AddRange(ReadMatrixSections(worksheet));
         }
@@ -260,6 +268,119 @@ public class ExcelRateImportService : IExcelRateImportService
             })
             .Select(g => g.First())
             .ToList();
+    }
+
+    private static IEnumerable<ExcelRateRow> ReadRamadaFixedLayoutSections(IXLWorksheet worksheet)
+    {
+        if (!LooksLikeRamadaFixedLayout(worksheet))
+        {
+            yield break;
+        }
+
+        foreach (var row in ReadFixedMatrixSection(
+            worksheet,
+            ExcelRateKind.Regular,
+            GetNonEmptyCellText(worksheet, 2, 3, "Walk-In Rates"),
+            dateRow: 3,
+            roomNameColumn: 2,
+            firstRoomRow: 5,
+            lastRoomRow: 9,
+            firstDateColumn: 3))
+        {
+            yield return row;
+        }
+
+        if (TryGetDate(worksheet.Cell(12, 3), out _))
+        {
+            foreach (var row in ReadFixedMatrixSection(
+                worksheet,
+                ExcelRateKind.Discount,
+                GetNonEmptyCellText(worksheet, 11, 3, "Discounted Rates"),
+                dateRow: 12,
+                roomNameColumn: 2,
+                firstRoomRow: 14,
+                lastRoomRow: 18,
+                firstDateColumn: 3))
+            {
+                yield return row;
+            }
+        }
+    }
+
+    private static bool LooksLikeRamadaFixedLayout(IXLWorksheet worksheet)
+    {
+        return HeaderEquals(worksheet.Cell(3, 2), "date")
+            && NormalizeHeader(worksheet.Cell(4, 2).GetString()).Contains("roomcategory")
+            && TryGetDate(worksheet.Cell(3, 3), out _)
+            && !string.IsNullOrWhiteSpace(worksheet.Cell(5, 2).GetString());
+    }
+
+    private static IEnumerable<ExcelRateRow> ReadFixedMatrixSection(
+        IXLWorksheet worksheet,
+        ExcelRateKind rateKind,
+        string sectionName,
+        int dateRow,
+        int roomNameColumn,
+        int firstRoomRow,
+        int lastRoomRow,
+        int firstDateColumn)
+    {
+        var dateColumns = GetFixedDateColumns(worksheet, dateRow, firstDateColumn).ToList();
+        if (!dateColumns.Any())
+        {
+            yield break;
+        }
+
+        for (var rowNumber = firstRoomRow; rowNumber <= lastRoomRow; rowNumber++)
+        {
+            var roomName = worksheet.Cell(rowNumber, roomNameColumn).GetString().Trim();
+            if (string.IsNullOrWhiteSpace(roomName))
+            {
+                continue;
+            }
+
+            foreach (var dateColumn in dateColumns)
+            {
+                if (!TryGetDecimal(worksheet.Cell(rowNumber, dateColumn.Column), out var rate))
+                {
+                    continue;
+                }
+
+                yield return new ExcelRateRow(
+                    worksheet.Name,
+                    sectionName,
+                    rateKind,
+                    dateColumn.Date,
+                    roomName,
+                    rate,
+                    null,
+                    null);
+            }
+        }
+    }
+
+    private static IEnumerable<(int Column, DateOnly Date)> GetFixedDateColumns(IXLWorksheet worksheet, int dateRow, int firstDateColumn)
+    {
+        var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber() ?? firstDateColumn;
+
+        for (var column = firstDateColumn; column <= lastColumn; column++)
+        {
+            if (TryGetDate(worksheet.Cell(dateRow, column), out var date))
+            {
+                yield return (column, date);
+            }
+        }
+    }
+
+    private static string GetNonEmptyCellText(IXLWorksheet worksheet, int row, int column, string fallback)
+    {
+        var text = worksheet.Cell(row, column).GetString().Trim();
+        return string.IsNullOrWhiteSpace(text) ? fallback : text;
+    }
+
+    private static bool HeaderEquals(IXLCell cell, string normalizedHeader)
+    {
+        return string.Equals(NormalizeHeader(cell.GetString()), normalizedHeader, StringComparison.OrdinalIgnoreCase);
     }
 
     private static IEnumerable<ExcelRateRow> ReadNormalizedTable(IXLWorksheet worksheet)
@@ -414,7 +535,14 @@ public class ExcelRateImportService : IExcelRateImportService
     private static ExcelRateKind DetectRateKind(string sectionName)
     {
         var normalized = NormalizeHeader(sectionName);
-        if (normalized.Contains("discount") || normalized.Contains("family") || normalized.Contains("friends"))
+        if (normalized.Contains("discount")
+            || normalized.Contains("family")
+            || normalized.Contains("friends")
+            || normalized.Contains("25")
+            || normalized.Contains("خصم")
+            || normalized.Contains("العائلة")
+            || normalized.Contains("الاصدقاء")
+            || normalized.Contains("الأصدقاء"))
         {
             return ExcelRateKind.Discount;
         }
@@ -425,7 +553,12 @@ public class ExcelRateImportService : IExcelRateImportService
     private static bool LooksLikeHeader(string value)
     {
         var normalized = NormalizeHeader(value);
-        return normalized.Contains("total") || normalized.Contains("date") || normalized.Contains("roomtype") || normalized.Contains("discount");
+        return normalized.Contains("total")
+            || normalized.Contains("date")
+            || normalized.Contains("roomtype")
+            || normalized.Contains("roomcategory")
+            || normalized.Contains("discount")
+            || normalized.Contains("خصم");
     }
 
     private static string NormalizeHeader(string value)
@@ -446,7 +579,8 @@ public class ExcelRateImportService : IExcelRateImportService
         }
 
         var text = cell.GetString().Trim();
-        if (DateTime.TryParse(text, out dt))
+        if (DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+            || DateTime.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out dt))
         {
             date = DateOnly.FromDateTime(dt);
             return true;
@@ -463,8 +597,21 @@ public class ExcelRateImportService : IExcelRateImportService
             return true;
         }
 
-        var text = cell.GetString().Trim().Replace(",", string.Empty);
-        return decimal.TryParse(text, out value);
+        var text = cell.GetString().Trim();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            value = default;
+            return false;
+        }
+
+        text = text
+            .Replace(",", string.Empty, StringComparison.Ordinal)
+            .Replace("SAR", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("ر.س", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
+
+        return decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out value)
+            || decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out value);
     }
 
     private static bool TryGetInt(IXLCell cell, out int value)

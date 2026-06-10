@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +9,25 @@ using RateManager.Net10.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.Configure<SharePointExcelSyncOptions>(builder.Configuration.GetSection("SharePointSync"));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("DefaultConnection is missing from appsettings.json.");
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(defaultConnection, new SqlServerStorageOptions
+    {
+        PrepareSchemaIfNecessary = true,
+        QueuePollInterval = TimeSpan.FromSeconds(15)
+    }));
+
+builder.Services.AddHangfireServer();
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -37,6 +56,7 @@ builder.Services.AddScoped<IExcelRateImportService, ExcelRateImportService>();
 builder.Services.AddScoped<IRateAuditService, RateAuditService>();
 builder.Services.AddScoped<ICurrentRateCalculatorService, CurrentRateCalculatorService>();
 builder.Services.AddScoped<IPmsExportService, PmsExportService>();
+builder.Services.AddScoped<ISharePointExcelSyncJob, SharePointExcelSyncJob>();
 
 var app = builder.Build();
 
@@ -52,6 +72,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAdminAuthorizationFilter() }
+});
+
 using (var scope = app.Services.CreateScope())
 {
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -62,6 +87,21 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.EnsureCreated();
         SeedData.Initialize(db);
+    }
+
+    var sharePointSyncEnabled = configuration.GetValue<bool>("SharePointSync:Enabled");
+    var checkEveryMinutes = Math.Max(1, configuration.GetValue<int?>("SharePointSync:CheckEveryMinutes") ?? 5);
+
+    if (sharePointSyncEnabled)
+    {
+        RecurringJob.AddOrUpdate<ISharePointExcelSyncJob>(
+            "sharepoint-excel-sync",
+            job => job.RunAsync(),
+            Cron.MinuteInterval(checkEveryMinutes));
+    }
+    else
+    {
+        RecurringJob.RemoveIfExists("sharepoint-excel-sync");
     }
 }
 
