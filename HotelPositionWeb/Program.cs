@@ -38,8 +38,6 @@ app.MapGet("/api/hotel-position", async (
     var toDate = fromDate.AddDays(numberOfDays - 1);
     var fromYmd = ToYmd(fromDate);
     var toYmd = ToYmd(toDate);
-    var fromYmdText = fromYmd.ToString("D8");
-    var toYmdText = toYmd.ToString("D8");
 
     var dates = Enumerable.Range(0, numberOfDays).Select(fromDate.AddDays).ToList();
 
@@ -77,23 +75,23 @@ app.MapGet("/api/hotel-position", async (
         ORDER BY ROMTYP, RUNDAT
         """, new { propertyCode, fromYmd, toYmd })).ToList();
 
-    var allocations = (await db.QueryAsync<AllocationDto>("""
+    var allocationRawRows = (await db.QueryAsync<AllocationRawDto>("""
         SELECT
-            X.RunDat AS RunDat,
+            CONVERT(varchar(100), A.RUNDAT) AS RunDatText,
             A.COMCOD AS ComCod,
             A.ROMTYP AS RomTyp,
-            COALESCE(TRY_CONVERT(int, A.INNALC), 0) AS InnAlc
+            CONVERT(varchar(100), A.INNALC) AS InnAlcText
         FROM pms.FMACHTBL A
-        CROSS APPLY (SELECT CONVERT(varchar(50), A.RUNDAT) AS RunDatText) T
-        CROSS APPLY (SELECT TRY_CONVERT(int, T.RunDatText) AS RunDat) X
         WHERE A.PRPCOD = @propertyCode
-          AND LEN(T.RunDatText) = 8
-          AND T.RunDatText NOT LIKE '%[^0-9]%'
-          AND T.RunDatText >= @fromYmdText
-          AND T.RunDatText <= @toYmdText
-          AND X.RunDat IS NOT NULL
-        ORDER BY T.RunDatText, A.COMCOD, A.ROMTYP
-        """, new { propertyCode, fromYmdText, toYmdText })).ToList();
+        ORDER BY A.RUNDAT, A.COMCOD, A.ROMTYP
+        """, new { propertyCode })).ToList();
+
+    var allocations = allocationRawRows
+        .Select(row => ToAllocation(row))
+        .Where(row => row is not null)
+        .Select(row => row!)
+        .Where(row => row.RunDat >= fromYmd && row.RunDat <= toYmd)
+        .ToList();
 
     var roomRows = roomTypes.Select(room => new GridRow(
         room.RomTyp,
@@ -140,8 +138,48 @@ static Dictionary<string, int?> BuildValues(IEnumerable<DateOnly> dates, Func<Da
 
 static int? NullIfZero(int value) => value == 0 ? null : value;
 
+static AllocationDto? ToAllocation(AllocationRawDto row)
+{
+    if (!TryParseYmd(row.RunDatText, out var runDat))
+    {
+        return null;
+    }
+
+    var innAlc = TryParseInt(row.InnAlcText, out var parsedInnAlc) ? parsedInnAlc : 0;
+    return new AllocationDto(runDat, row.ComCod, row.RomTyp, innAlc);
+}
+
+static bool TryParseYmd(string? value, out int result)
+{
+    result = 0;
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        return false;
+    }
+
+    var trimmed = value.Trim();
+    if (trimmed.Length != 8 || trimmed.Any(ch => ch < '0' || ch > '9'))
+    {
+        return false;
+    }
+
+    return int.TryParse(trimmed, out result);
+}
+
+static bool TryParseInt(string? value, out int result)
+{
+    result = 0;
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        return false;
+    }
+
+    return int.TryParse(value.Trim(), out result);
+}
+
 public sealed record RoomTypeDto(int DspSeq, string RomTyp, int AppDat, int TotRom, string ShtNam);
 public sealed record PositionDto(int RunDat, string RomTyp, int PostOn);
+public sealed record AllocationRawDto(string? RunDatText, string ComCod, string RomTyp, string? InnAlcText);
 public sealed record AllocationDto(int RunDat, string ComCod, string RomTyp, int InnAlc);
 public sealed record GridRow(string Key, string Name, Dictionary<string, int?> Values);
 public sealed record HotelPositionResponse(
