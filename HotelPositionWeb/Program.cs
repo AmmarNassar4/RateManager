@@ -38,6 +38,8 @@ app.MapGet("/api/hotel-position", async (
     var toDate = fromDate.AddDays(numberOfDays - 1);
     var fromYmd = ToYmd(fromDate);
     var toYmd = ToYmd(toDate);
+    var fromYmdText = fromYmd.ToString("D8");
+    var toYmdText = toYmd.ToString("D8");
 
     var dates = Enumerable.Range(0, numberOfDays).Select(fromDate.AddDays).ToList();
 
@@ -82,13 +84,16 @@ app.MapGet("/api/hotel-position", async (
             A.ROMTYP AS RomTyp,
             COALESCE(TRY_CONVERT(int, A.INNALC), 0) AS InnAlc
         FROM pms.FMACHTBL A
-        CROSS APPLY (SELECT TRY_CONVERT(int, A.RUNDAT) AS RunDat) X
+        CROSS APPLY (SELECT CONVERT(varchar(50), A.RUNDAT) AS RunDatText) T
+        CROSS APPLY (SELECT TRY_CONVERT(int, T.RunDatText) AS RunDat) X
         WHERE A.PRPCOD = @propertyCode
+          AND LEN(T.RunDatText) = 8
+          AND T.RunDatText NOT LIKE '%[^0-9]%'
+          AND T.RunDatText >= @fromYmdText
+          AND T.RunDatText <= @toYmdText
           AND X.RunDat IS NOT NULL
-          AND X.RunDat >= @fromYmd
-          AND X.RunDat <= @toYmd
-        ORDER BY X.RunDat, A.COMCOD, A.ROMTYP
-        """, new { propertyCode, fromYmd, toYmd })).ToList();
+        ORDER BY T.RunDatText, A.COMCOD, A.ROMTYP
+        """, new { propertyCode, fromYmdText, toYmdText })).ToList();
 
     var roomRows = roomTypes.Select(room => new GridRow(
         room.RomTyp,
