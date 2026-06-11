@@ -77,21 +77,17 @@ app.MapGet("/api/hotel-position", async (
 
     var allocations = (await db.QueryAsync<AllocationDto>("""
         SELECT
-            CAST(A.RUNDAT AS int) AS RunDat,
+            X.RunDat AS RunDat,
             A.COMCOD AS ComCod,
             A.ROMTYP AS RomTyp,
-            CAST(A.INNALC AS int) AS InnAlc
+            COALESCE(TRY_CONVERT(int, A.INNALC), 0) AS InnAlc
         FROM pms.FMACHTBL A
-        INNER JOIN pms.FMALCTBL B
-            ON B.COMCOD = A.COMCOD
-           AND B.PRPCOD = A.PRPCOD
-           AND B.ROMTYP = A.ROMTYP
-           AND A.RUNDAT >= B.APPDAT
-           AND A.RUNDAT <= B.TOODAT
+        CROSS APPLY (SELECT TRY_CONVERT(int, A.RUNDAT) AS RunDat) X
         WHERE A.PRPCOD = @propertyCode
-          AND A.RUNDAT >= @fromYmd
-          AND A.RUNDAT <= @toYmd
-        ORDER BY A.RUNDAT, A.COMCOD, A.ROMTYP
+          AND X.RunDat IS NOT NULL
+          AND X.RunDat >= @fromYmd
+          AND X.RunDat <= @toYmd
+        ORDER BY X.RunDat, A.COMCOD, A.ROMTYP
         """, new { propertyCode, fromYmd, toYmd })).ToList();
 
     var roomRows = roomTypes.Select(room => new GridRow(
