@@ -83,7 +83,6 @@ app.MapGet("/api/hotel-position", async (
             CONVERT(varchar(100), A.INNALC) AS InnAlcText
         FROM pms.FMACHTBL A
         WHERE A.PRPCOD = @propertyCode
-        ORDER BY A.RUNDAT, A.COMCOD, A.ROMTYP
         """, new { propertyCode })).ToList();
 
     var allocations = allocationRawRows
