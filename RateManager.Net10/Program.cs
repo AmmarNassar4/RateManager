@@ -89,20 +89,12 @@ using (var scope = app.Services.CreateScope())
         SeedData.Initialize(db);
     }
 
-    var sharePointSyncEnabled = configuration.GetValue<bool>("SharePointSync:Enabled");
     var checkEveryMinutes = Math.Max(1, configuration.GetValue<int?>("SharePointSync:CheckEveryMinutes") ?? 5);
 
-    if (sharePointSyncEnabled)
-    {
-        RecurringJob.AddOrUpdate<ISharePointExcelSyncJob>(
-            "sharepoint-excel-sync",
-            job => job.RunAsync(),
-            Cron.MinuteInterval(checkEveryMinutes));
-    }
-    else
-    {
-        RecurringJob.RemoveIfExists("sharepoint-excel-sync");
-    }
+    RecurringJob.AddOrUpdate<ISharePointExcelSyncJob>(
+        "sharepoint-excel-sync",
+        job => job.RunAsync(),
+        Cron.MinuteInterval(checkEveryMinutes));
 }
 
 app.MapControllerRoute(
