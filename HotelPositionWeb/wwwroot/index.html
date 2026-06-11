@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>Hotel Position</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f7f0dc; }
+        table { border-collapse: collapse; width: 100%; background: #fff7df; }
+        th, td { border: 1px solid #c8b98e; padding: 6px; text-align: center; font-size: 13px; }
+        th:first-child, td:first-child { text-align: left; min-width: 180px; }
+        .position { background: #8fd0cf; font-weight: bold; }
+        .controls { margin-bottom: 12px; }
+        input { padding: 5px; margin-left: 8px; }
+        button { padding: 6px 14px; }
+        .error { color: #b00020; margin-top: 12px; white-space: pre-wrap; direction: ltr; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>Hotel Position</h2>
+
+    <div class="controls">
+        <label>Property</label>
+        <input id="property" value="RRK" />
+        <label>From Date</label>
+        <input id="from" type="date" />
+        <label>Days</label>
+        <input id="days" type="number" value="17" />
+        <button onclick="loadData()">Refresh</button>
+    </div>
+
+    <div id="tableContainer"></div>
+    <div id="error" class="error"></div>
+
+    <script>
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById("from").value = today;
+
+        async function loadData() {
+            document.getElementById("error").textContent = "";
+            const property = encodeURIComponent(document.getElementById("property").value);
+            const from = encodeURIComponent(document.getElementById("from").value);
+            const days = encodeURIComponent(document.getElementById("days").value);
+
+            try {
+                const response = await fetch(`/api/hotel-position?property=${property}&from=${from}&days=${days}`);
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
+                const data = await response.json();
+                const rows = [
+                    ...data.roomRows,
+                    data.position,
+                    data.allocation,
+                    data.totalRooms
+                ];
+
+                let html = "<table><thead><tr><th>From Date</th>";
+                for (const date of data.dateKeys) {
+                    html += `<th>${date}</th>`;
+                }
+                html += "</tr></thead><tbody>";
+
+                for (const row of rows) {
+                    const cssClass = row.key === "Position" ? "position" : "";
+                    html += `<tr class="${cssClass}"><td>${row.name}</td>`;
+                    for (const date of data.dateKeys) {
+                        html += `<td>${row.values[date] ?? ""}</td>`;
+                    }
+                    html += "</tr>";
+                }
+
+                html += "</tbody></table>";
+                document.getElementById("tableContainer").innerHTML = html;
+            } catch (error) {
+                document.getElementById("error").textContent = error.message;
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
