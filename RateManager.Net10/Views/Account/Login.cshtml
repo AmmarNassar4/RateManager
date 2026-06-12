@@ -1,35 +1,65 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "Login";
+    Layout = "_Layout";
 }
 
-<section class="page-header">
-    <h1>Login</h1>
-    <p>Enter your username and password to access the system.</p>
-</section>
+<section class="login-shell">
+    <div class="login-hero card">
+        <div class="login-badge">Rate Manager</div>
+        <h1>Welcome back</h1>
+        <p>Sign in to manage rates, imports, exports, and daily operations from one secure dashboard.</p>
 
-<form asp-action="Login" method="post" class="card form-card auth-card">
-    <div asp-validation-summary="ModelOnly" class="validation"></div>
-    <input asp-for="ReturnUrl" type="hidden" />
-
-    <label>
-        Username
-        <input asp-for="UserName" autocomplete="username" autofocus />
-    </label>
-
-    <label>
-        Password
-        <input asp-for="Password" type="password" autocomplete="current-password" />
-    </label>
-
-    <label class="checkbox-line">
-        <input asp-for="RememberMe" type="checkbox" />
-        Remember me
-    </label>
-
-    <div class="actions-row">
-        <button type="submit" class="button primary">Login</button>
+        <div class="login-feature-list">
+            <div>
+                <span>01</span>
+                <strong>Live rate tools</strong>
+                <small>Current rates, Excel imports, and PMS exports.</small>
+            </div>
+            <div>
+                <span>02</span>
+                <strong>Automated sync</strong>
+                <small>Hangfire jobs monitor SharePoint updates.</small>
+            </div>
+            <div>
+                <span>03</span>
+                <strong>Secure access</strong>
+                <small>Role-based access for Admin and Viewer users.</small>
+            </div>
+        </div>
     </div>
 
-   
-</form>
+    <form asp-action="Login" method="post" class="card login-card">
+        <div class="login-card-header">
+            <span class="login-icon">RM</span>
+            <div>
+                <h2>Sign in</h2>
+                <p>Use your assigned username and password.</p>
+            </div>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="validation login-validation"></div>
+        <input asp-for="ReturnUrl" type="hidden" />
+
+        <label class="login-field">
+            <span>Username</span>
+            <input asp-for="UserName" autocomplete="username" autofocus placeholder="Enter username" />
+        </label>
+
+        <label class="login-field">
+            <span>Password</span>
+            <input asp-for="Password" type="password" autocomplete="current-password" placeholder="Enter password" />
+        </label>
+
+        <div class="login-options-row">
+            <label class="checkbox-line login-checkbox">
+                <input asp-for="RememberMe" type="checkbox" />
+                <span>Remember me for 30 days</span>
+            </label>
+        </div>
+
+        <button type="submit" class="button primary login-button">Login</button>
+
+        <p class="login-cookie-note">A secure authentication cookie is used to keep your session active.</p>
+    </form>
+</section>
