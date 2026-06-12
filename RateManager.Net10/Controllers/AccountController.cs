@@ -13,6 +13,7 @@ namespace RateManager.Net10.Controllers;
 [AllowAnonymous]
 public class AccountController : Controller
 {
+    private const string LastUserNameCookieName = "RateManager.LastUserName";
     private readonly AppDbContext _db;
 
     public AccountController(AppDbContext db)
@@ -28,7 +29,16 @@ public class AccountController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        var model = new LoginViewModel { ReturnUrl = returnUrl };
+
+        if (Request.Cookies.TryGetValue(LastUserNameCookieName, out var rememberedUserName)
+            && !string.IsNullOrWhiteSpace(rememberedUserName))
+        {
+            model.UserName = rememberedUserName;
+            model.RememberMe = true;
+        }
+
+        return View(model);
     }
 
     [HttpPost]
@@ -50,6 +60,9 @@ public class AccountController : Controller
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
+        var expiresUtc = model.RememberMe
+            ? DateTimeOffset.UtcNow.AddDays(30)
+            : DateTimeOffset.UtcNow.AddHours(8);
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
@@ -57,8 +70,25 @@ public class AccountController : Controller
             new AuthenticationProperties
             {
                 IsPersistent = model.RememberMe,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                ExpiresUtc = expiresUtc,
+                AllowRefresh = true
             });
+
+        if (model.RememberMe)
+        {
+            Response.Cookies.Append(LastUserNameCookieName, user.UserName, new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps,
+                IsEssential = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(30)
+            });
+        }
+        else
+        {
+            Response.Cookies.Delete(LastUserNameCookieName);
+        }
 
         if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
         {
