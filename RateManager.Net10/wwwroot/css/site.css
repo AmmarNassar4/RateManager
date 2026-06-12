@@ -92,7 +92,157 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
 .final-rate.manual { background: var(--manual); font-weight: 700; }
 .validation { color: var(--danger); margin-bottom: 12px; }
 .hint { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: 12px; padding: 12px; }
+
+.login-shell {
+    min-height: calc(100vh - 112px);
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 28px;
+    align-items: stretch;
+}
+.login-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 42px;
+    color: white;
+    background:
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.55), transparent 34%),
+        linear-gradient(135deg, #111827 0%, #1e3a8a 55%, #2563eb 100%);
+    border: 0;
+}
+.login-hero::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -70px;
+    bottom: -70px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+}
+.login-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.login-hero h1 {
+    margin: 92px 0 14px;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 0.95;
+}
+.login-hero p {
+    max-width: 620px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 18px;
+    line-height: 1.6;
+}
+.login-feature-list {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 72px;
+}
+.login-feature-list div {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(10px);
+}
+.login-feature-list span {
+    display: block;
+    color: #bfdbfe;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+.login-feature-list strong { display: block; margin-bottom: 6px; }
+.login-feature-list small { color: rgba(255, 255, 255, 0.72); line-height: 1.45; }
+.login-card {
+    align-self: center;
+    max-width: 480px;
+    width: 100%;
+    justify-self: center;
+    padding: 34px;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+}
+.login-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+.login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: var(--primary);
+    font-weight: 900;
+}
+.login-card h2 { margin: 0 0 4px; font-size: 30px; }
+.login-card p { margin: 0; color: var(--muted); }
+.login-field span { color: #374151; }
+.login-field input {
+    min-height: 48px;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+.login-field input:focus {
+    outline: 3px solid rgba(37, 99, 235, 0.16);
+    border-color: #93c5fd;
+    background: white;
+}
+.login-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 0 18px;
+}
+.login-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+.login-checkbox input { width: 18px; height: 18px; }
+.login-button {
+    width: 100%;
+    min-height: 50px;
+    border-radius: 14px;
+    font-size: 16px;
+}
+.login-cookie-note {
+    margin-top: 18px !important;
+    text-align: center;
+    font-size: 13px;
+}
+.login-validation {
+    padding: 12px;
+    border-radius: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
 @media (max-width: 900px) {
     .stats-grid, .settings-grid, .form-grid { grid-template-columns: 1fr; }
     .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .login-shell { grid-template-columns: 1fr; }
+    .login-feature-list { grid-template-columns: 1fr; margin-top: 32px; }
+    .login-hero h1 { margin-top: 48px; }
+    .login-card { max-width: none; }
 }
