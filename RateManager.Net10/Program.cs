@@ -8,11 +8,6 @@ using RateManager.Net10.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseWindowsService(options =>
-{
-    options.ServiceName = "Rate Manager";
-});
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.Configure<SharePointExcelSyncOptions>(builder.Configuration.GetSection("SharePointSync"));
